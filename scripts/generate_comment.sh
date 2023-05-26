@@ -11,5 +11,5 @@ echo "|<span aria-hidden="true">🏠</span> Manager | https://$DE_HOST/apps/$APP
 echo "|<span aria-hidden="true">😎</span> **Deploy Preview** | https://$DE_HOST/$APP-$EVENT_NUMBER |" >> message.md
 echo "---" >> message.md
 echo "" >> message.md
-echo "Complete diffs of deployment: $GITHUB_SHA" >> message.md
+echo "Complete diffs of deployment: $SHA" >> message.md
 echo "*Note: Application build may not be complete at the time of this notification.*" >> message.md
