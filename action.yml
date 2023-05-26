@@ -81,9 +81,9 @@ runs:
         APP_NAME=$("$SCRIPTS_PATH/get_app_name.sh")
         APP=$APP_NAME METHOD="DELETE" python ${{ github.action_path }}/scripts/manage_apps.py
       env:
-        DE_PASSWORD: ${{secrets.DE_PASSWORD}}
-        DE_HOST: ${{secrets.DE_HOST}}
-        DE_USERNAME: ${{secrets.DE_USERNAME}}
+        DE_PASSWORD: ${{inputs.DE_PASSWORD}}
+        DE_HOST: ${{inputs.DE_HOST}}
+        DE_USERNAME: ${{inputs.DE_USERNAME}}
         APP_NAME: ${{ inputs.app_name }}
     - name: Check for existing comment
       uses: peter-evans/find-comment@v1
