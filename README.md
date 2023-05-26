@@ -19,7 +19,7 @@ jobs:
     name: 'Deploy to Dash Enterprise'
     runs-on: ubuntu-latest
     steps:
-      - uses: plotly/de5-deploy@latest
+      - uses: plotly/de5-deploy@main
         with:
           DE_HOST: ${{ secrets.DE_HOST }}
           DE_USERNAME: ${{ secrets.DE_USERNAME }}
@@ -65,7 +65,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
-      - uses: plotly/de5-deploy@latest
+      - uses: plotly/de5-deploy@main
         with:
           DE_HOST: ${{ secrets.DE_HOST }}
           DE_USERNAME: ${{ secrets.DE_USERNAME }}
@@ -90,7 +90,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
-      - uses: plotly/de5-deploy@latest
+      - uses: plotly/de5-deploy@main
         with:
           DE_HOST: ${{ secrets.DE_HOST }}
           DE_USERNAME: ${{ secrets.DE_USERNAME }}
