@@ -79,11 +79,12 @@ runs:
         comment-id: ${{ steps.fc.outputs.comment-id }}
         edit-mode: replace
         body-file: 'message.md'
-    - name: Remove any staging applications
+    - name: Remove staging application
       shell: bash
       if: github.event.action == 'closed'
       run: |
         APP_NAME=$("$SCRIPTS_PATH/get_app_name.sh")
+        echo $APP_NAME
         APP=$APP_NAME METHOD="DELETE" python ${{ github.action_path }}/scripts/manage_apps.py
       env:
         DE_PASSWORD: ${{inputs.DE_PASSWORD}}
