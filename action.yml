@@ -1,37 +1,24 @@
-name: deploy to Dash Enterprise 5
+name: Dash Enterprise Deploy
 
 on:
   workflow_call:
     inputs:
-      suffix:
-        required: false
-        type: string
-      app_name:
+      DE_PASSWORD:
         required: true
-        type: string
-      create_app:
+      DE_HOST:
         required: true
-        type: string
-    secrets:
-      DASH_ENTERPRISE_PASSWORD:
-        required: true
-      DASH_ENTERPRISE_HOST:
-        required: true
-      DASH_ENTERPRISE_USERNAME:
+      DE_USERNAME:
         required: true
       ACCESS_TOKEN:
         required: true
-      
-
+      app_name:
+        required: false
+        type: string
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
@@ -42,20 +29,51 @@ jobs:
           python -m pip install --upgrade pip
           pip install git+https://github.com/plotly/dekn-cli-python.git
         env:
-          TOKEN: ${{ secrets.ACCESS_TOKEN }}
-      - name: Create helper script
-        run: |
-          printf '#!/bin/bash\necho username=$DASH_ENTERPRISE_USERNAME\necho password=$DASH_ENTERPRISE_PASSWORD' >> helper-script.sh
+          TOKEN: ${{ inputs.ACCESS_TOKEN }}
       - name: Set up git config
-        run: |
-          git config --global credential.helper "/bin/bash $(pwd)/helper-script.sh"
-          git config --global user.email '<>' # Leave email blank
-          git config --global user.name "Github Automatic Deployer"
-          git config --global protocol.version 0
+        run: ${{ github.action_path }}/scripts/git_config.sh
+        shell: bash
       - name: Inject code and deploy
         run: |
-          PATH="$HOME/bin:$PATH" CREATE_APP=${{ inputs.suffix }} SUFFIX=${{ inputs.suffix }} ./deploy ${{ inputs.app_name }}
+          # If an app name is not provided, use the repository name as the app name
+          if [ -z "$APP_NAME" ]; then
+            repository="${{ github.repository }}"
+            APP_NAME=${repository#*/}
+          fi
+          PATH="$HOME/bin:$PATH" CREATE_APP='true' deploy_alias=${{ inputs.deploy_alias }} $SCRIPTS_PATH/deploy.sh $APP_NAME
         env:
-          DASH_ENTERPRISE_HOST: ${{secrets.DASH_ENTERPRISE_HOST}}
-          DASH_ENTERPRISE_PASSWORD: ${{secrets.DASH_ENTERPRISE_PASSWORD}}
-          DASH_ENTERPRISE_USERNAME: ${{secrets.DASH_ENTERPRISE_USERNAME}}
+          DE_HOST: ${{inputs.DE_HOST}}
+          DE_PASSWORD: ${{inputs.DE_PASSWORD}}
+          DE_USERNAME: ${{inputs.DE_USERNAME}}
+          APP_NAME: ${{ inputs.app_name }}
+          SCRIPTS_PATH: ${{ github.action_path }}/scripts
+      - name: Generate comment for PR
+        id: changed
+        if: github.event_name == 'pull_request' && github.event.pull_request
+        shell: bash
+        run: ${{ github.action_path }}/scripts/generate_comment.sh
+      - name: Check for existing comment
+        uses: peter-evans/find-comment@v1
+        id: fc
+        if: github.event_name == 'pull_request' && github.event.pull_request
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+      - name: Post comment
+        if: steps.fc.outputs.comment-id == '' && github.event_name == 'pull_request' && github.event.pull_request
+        uses: peter-evans/create-or-update-comment@v2
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body-file: 'message.md'
+      - name: Update comment
+        if: steps.fc.outputs.comment-id != '' && github.event_name == 'pull_request' && github.event.pull_request
+        uses: peter-evans/create-or-update-comment@v2
+        with:
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          edit-mode: replace
+          body-file: 'message.md'
+      
+
+branding:
+  icon: activity
+  color: purple

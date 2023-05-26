@@ -5,7 +5,7 @@ set -eo pipefail
 readonly SOURCE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 readonly APPS_DIR_RELATIVE="${APPS_DIR_RELATIVE:-/}"
 readonly APPS_DIR="${APPS_DIR:-${SOURCE_DIR}${APPS_DIR_RELATIVE}}"
-readonly DASH_ENTERPRISE_HOST="${DASH_ENTERPRISE_HOST}"
+readonly DE_HOST="${DE_HOST}"
 readonly CREATE_APP="${CREATE_APP:-false}"
 
 log-header() {
@@ -42,12 +42,16 @@ fn-check-env() {
     log-exit "App $APP is in the .deployignore file, skipping deploy"
   fi
 
-  if [[ -z "$DASH_ENTERPRISE_USERNAME" ]]; then
-    log-fail "DASH_ENTERPRISE_USERNAME is not defined"
+  if [[ -z "$DE_USERNAME" ]]; then
+    log-fail "DE_USERNAME is not defined"
   fi
 
-  if [[ -z "$DASH_ENTERPRISE_HOST" ]]; then
-    log-fail "DASH_ENTERPRISE_HOST is not defined"
+  if [[ -z "$DE_HOST" ]]; then
+    log-fail "DE_HOST is not defined"
+  fi
+
+  if [[ -z "$DE_PASSWORD" ]]; then
+    log-fail "DE_PASSWORD is not defined"
   fi
 
   if [[ -z "$GITHUB_SHA" ]]; then
@@ -57,9 +61,9 @@ fn-check-env() {
 
 main() {
   declare APP="$1"
-  local app_dir="$APPS_DIR$APP"
-  local with_suffix="$APP$SUFFIX"
-  local remote_url="https://$DASH_ENTERPRISE_HOST/GIT/$with_suffix"
+  local app_dir="$APPS_DIR"
+  local with_alias="$APP$deploy_alias"
+  local remote_url="https://$DE_HOST/GIT/$with_alias"
   local app_created=false
   local force_push=true
   local push_code=false
@@ -76,30 +80,24 @@ main() {
     push_code=false
   fi
 
-  if [[ $with_suffix == *-demos ]]; then
+  if [[ $with_alias == *-demos ]]; then
     if [[ "$push_code" != "true" ]]; then
-      push_code=$(APP=$with_suffix METHOD="PUSH" python ./manage_apps.py)
+      push_code=$(APP=$with_alias METHOD="PUSH" python $ACTION_PATH/manage_apps.py)
     fi
   fi
 
   if [[ "$push_code" != "true" ]]; then
     log-header "🤜 App exists and is not updated in latest commit, skipping deploy"
-    log-info "Check app out at https://$DASH_ENTERPRISE_HOST/$with_suffix/"
+    log-info "Check app out at https://$DE_HOST/$with_alias/"
     return 0
   fi
 
-  log-header "Deploying $with_suffix"  
+  log-header "Deploying $with_alias"  
   
-  APP=$with_suffix METHOD="CREATE" python ./manage_apps.py
+  APP=$with_alias METHOD="CREATE" python $ACTION_PATH/manage_apps.py
 
   # Disable sslverification
   git config --global http.sslVerify false
-
-  # Here we generate a zip file of the project and add it the project. This can be useful for distributing
-  # the source without providing access to the repository, but may not be used in the final project.
-  log-info "Generating zip file"
-  cd $APPS_DIR && zip -qr "${APP}/assets/${APP}" $APP && cd -
-  log-info "Zip file generated"
 
   pushd "$app_dir" >/dev/null
   git init -q
@@ -110,7 +108,7 @@ main() {
   popd >/dev/null
 
   pushd "$app_dir" >/dev/null
-  log-header "Deploying $with_suffix via force push"
+  log-header "Deploying $with_alias via force push"
   git push --force plotly master
   rm -rf ".git" >/dev/null
   popd >/dev/null
