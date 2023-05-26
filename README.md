@@ -24,7 +24,7 @@ jobs:
           DE_HOST: ${{ secrets.DE_HOST }}
           DE_USERNAME: ${{ secrets.DE_USERNAME }}
           DE_PASSWORD: ${{ secrets.DE_PASSWORD }}
-          GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+          GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
 ```
 
 ### Inputs
@@ -39,7 +39,7 @@ The inputs this action uses are:
 | `DE_HOST` | `true` | N/A | The hostname of the DE instance, e.g. `example.plotly.host`. |
 | `DE_USERNAME` | `true` | N/A | The username to deploy under. This user will be the application owner (it is recommended to configure a service user for automated deploys, e.g. `bot`) |
 | `DE_PASSWORD` | `true` | N/A | The password for the specified user. |
-| `GITHUB_ACCESS_TOKEN` | `true` | N/A | An access token for Github. |
+| `GH_ACCESS_TOKEN` | `true` | N/A | An access token for Github. |
 | `DE_DEPLOY_TO_PROD` | `true` | `false` | Whether to deploy to the production namespace or to a deploy preview. |
 | `app_name` | `false` | Repository name | The slug name for the application on DE. |
 | `deploy_alias` | `false` | `None` | A suffix/alias for the application. The application will be deployed to `${app_name}-${deploy_alias}`. |
@@ -70,7 +70,7 @@ jobs:
           DE_HOST: ${{ secrets.DE_HOST }}
           DE_USERNAME: ${{ secrets.DE_USERNAME }}
           DE_PASSWORD: ${{ secrets.DE_PASSWORD }}
-          GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+          GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
 ```
 
 ### Preview Deploy on pull request
@@ -95,6 +95,6 @@ jobs:
           DE_HOST: ${{ secrets.DE_HOST }}
           DE_USERNAME: ${{ secrets.DE_USERNAME }}
           DE_PASSWORD: ${{ secrets.DE_PASSWORD }}
-          GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+          GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
           DE_DEPLOY_TO_PROD: false
 ```
