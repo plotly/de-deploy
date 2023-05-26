@@ -77,6 +77,7 @@ runs:
         body-file: 'message.md'
     - name: Remove any staging applications
       shell: bash
+      if: github.event.action == 'closed'
       run: |
         APP_NAME=$("$SCRIPTS_PATH/get_app_name.sh")
         APP=$APP_NAME METHOD="DELETE" python ${{ github.action_path }}/scripts/manage_apps.py
@@ -85,14 +86,16 @@ runs:
         DE_HOST: ${{inputs.DE_HOST}}
         DE_USERNAME: ${{inputs.DE_USERNAME}}
         APP_NAME: ${{ inputs.app_name }}
+        SCRIPTS_PATH: ${{ github.action_path }}/scripts
     - name: Check for existing comment
       uses: peter-evans/find-comment@v2
       id: f_old
+      if: github.event.action == 'closed'
       with:
         issue-number: ${{ github.event.pull_request.number }}
         comment-author: 'github-actions[bot]'
     - name: Update existing comment
-      if: steps.f_old.outputs.comment-id != ''
+      if: steps.f_old.outputs.comment-id != '' && github.event.action == 'closed'
       uses: peter-evans/create-or-update-comment@v2
       with:
         comment-id: ${{ steps.fc.outputs.comment-id }}
