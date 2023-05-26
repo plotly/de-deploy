@@ -68,7 +68,10 @@ main() {
   fn-check-env "$APP"
 
   log-header "Deploying $with_alias"  
-  
+
+  # Remove existing git information
+  rm -rf .git
+
   APP=$with_alias METHOD="CREATE" python $SCRIPTS_PATH/manage_apps.py
 
   # Disable sslverification
