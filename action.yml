@@ -30,7 +30,6 @@ runs:
     - name: Set up git config
       shell: bash
       run: ${{ github.action_path }}/scripts/git_config.sh
-      shell: bash
     - name: Inject code and deploy
       shell: bash
       run: |
