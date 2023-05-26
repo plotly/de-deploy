@@ -67,27 +67,6 @@ main() {
 
   fn-check-env "$APP"
 
-  # Check whether any files in app directory have been changed in most recent commit
-  changed_files="$(git diff --name-only HEAD HEAD~1)"
-  changed_dirs="$(cut -d/ -f1 <<< "$changed_files" | sort -u)"
-  if grep -Fxq "$APP" <<< "$changed_dirs" ; then
-    push_code=true
-  else
-    push_code=false
-  fi
-
-  if [[ $with_alias == *-demos ]]; then
-    if [[ "$push_code" != "true" ]]; then
-      push_code=$(APP=$with_alias METHOD="PUSH" python $ACTION_PATH/manage_apps.py)
-    fi
-  fi
-
-  if [[ "$push_code" != "true" ]]; then
-    log-header "🤜 App exists and is not updated in latest commit, skipping deploy"
-    log-info "Check app out at https://$DE_HOST/$with_alias/"
-    return 0
-  fi
-
   log-header "Deploying $with_alias"  
   
   APP=$with_alias METHOD="CREATE" python $ACTION_PATH/manage_apps.py

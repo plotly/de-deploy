@@ -1,3 +1,7 @@
+#!/usr/bin/env bash
+[[ -n "$TRACE" ]] && set -x
+set -eo pipefail
+
 printf '#!/bin/bash\necho username=$DE_USERNAME\necho password=$DE_PASSWORD' >> helper-script.sh
 git config --global credential.helper "/bin/bash $(pwd)/helper-script.sh"
 git config --global user.email '<>' # Leave email blank

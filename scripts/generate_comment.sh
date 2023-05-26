@@ -1,3 +1,7 @@
+#!/usr/bin/env bash
+[[ -n "$TRACE" ]] && set -x
+set -eo pipefail
+
 APPS=$(ls -d */ | sort -u)
 changed_files="$(git diff --name-only HEAD HEAD~1)"
 changed_dirs="$(cut -d/ -f1 <<< "$changed_files" | sort -u)"
