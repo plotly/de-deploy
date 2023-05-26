@@ -17,6 +17,7 @@ on:
 jobs:
   deploy:
     name: 'Deploy to Dash Enterprise'
+    runs-on: ubuntu-latest
     steps:
       - uses: plotly/de5-deploy@latest
         with:
@@ -97,67 +98,3 @@ jobs:
           GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           DE_DEPLOY_TO_PROD: false
 ```
-
-### Use branch name to deploy
-
-Will deploy branches as `https://${branchName}--${siteName}.netlify.app`.
-
-An action is used to extract the branch name to avoid fiddling with `refs/`. Finally, a commit status check is added, linking to the deployed site.
-
-Only the default branch is built for simplicity. Use a similar workflow or standard Netlify integration for the production deployment.
-
-```yml
-name: 'Netlify Previews'
-
-on:
-  push:
-    branches-ignore: 
-      - master
-
-jobs:
-  deploy:
-    name: 'Deploy'
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v1
-
-      # Sets the branch name as environment variable
-      - uses: nelonoel/branch-name@v1.0.1
-      - uses: jsmrcaga/action-netlify-deploy@master
-        with:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-          deploy_alias: ${{ env.BRANCH_NAME }}
-      
-      # Creates a status check with link to preview
-      - name: Status check
-        uses: Sibz/github-status-action@v1.1.1
-        with:
-          authToken: ${{ secrets.GITHUB_TOKEN }}
-          context: Netlify preview
-          state: success
-          target_url: ${{ env.NETLIFY_PREVIEW_URL }}
-```
-
-### Deploy to Netlify only
-
-In case of already having the deployment ready data - we can easily skip the nvm, install and build part via passing:
-
-```
-- name: Deploy to Netlify
-  uses: jsmrcaga/action-netlify-deploy@v2.0.0
-  with:
-    NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-    NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-    NETLIFY_DEPLOY_MESSAGE: "Deployed from GitHub action"
-    NETLIFY_DEPLOY_TO_PROD: true
-    install_command: "echo Skipping installing the dependencies"
-    build_command: "echo Skipping building the web files"
-```
-
-## Contributors
-
-- [tpluscode](https://github.com/tpluscode)
-- [wallies](https://github.com/wallies)
-- [crisperit](https://github.com/crisperit)
