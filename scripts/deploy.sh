@@ -6,8 +6,8 @@ readonly SOURCE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 &&
 echo $SOURCE_DIR
 readonly APPS_DIR_RELATIVE="${APPS_DIR_RELATIVE:-/}"
 echo $APPS_DIR_RELATIVE
-readonly APPS_DIR="${APPS_DIR:-${SOURCE_DIR}${APPS_DIR_RELATIVE}}"
-echo $APPS_DIR_RELATIVE
+readonly APP_DIR="${APPS_DIR:-${SOURCE_DIR}${APPS_DIR_RELATIVE}}"
+echo $APP_DIR
 readonly CREATE_APP="${CREATE_APP:-false}"
 
 log-header() {
@@ -59,7 +59,6 @@ fn-check-env() {
 
 main() {
   declare APP="$1"
-  local app_dir="$APPS_DIR"
   local with_alias="$APP$deploy_alias"
   local remote_url="https://$DE_HOST/GIT/$with_alias"
   local app_created=false
@@ -79,7 +78,7 @@ main() {
   # Disable sslverification
   git config --global http.sslVerify false
 
-  pushd "$app_dir" >/dev/null
+  pushd "$APP_DIR" >/dev/null
   git init -q
   git remote rm origin 2>/dev/null || true
   git remote add "plotly" "$remote_url"
@@ -87,7 +86,7 @@ main() {
   git commit -qm "Deployed commit: $GITHUB_SHA"
   popd >/dev/null
 
-  pushd "$app_dir" >/dev/null
+  pushd "$APP_DIR" >/dev/null
   log-header "Deploying $with_alias via force push"
   git push --force plotly master
   rm -rf ".git" >/dev/null
