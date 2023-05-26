@@ -1,77 +1,73 @@
 name: Dash Enterprise Deploy
-
-on:
-  workflow_call:
-    inputs:
-      DE_PASSWORD:
-        required: true
-      DE_HOST:
-        required: true
-      DE_USERNAME:
-        required: true
-      ACCESS_TOKEN:
-        required: true
-      app_name:
-        required: false
-        type: string
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Set up Python
-        uses: actions/setup-python@v3
-        with:
-          python-version: '3.x'
-      - name: Install dekn-cli-python
-        run: |
-          git config --global url."https://${TOKEN}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
-          python -m pip install --upgrade pip
-          pip install git+https://github.com/plotly/dekn-cli-python.git
-        env:
-          TOKEN: ${{ inputs.ACCESS_TOKEN }}
-      - name: Set up git config
-        run: ${{ github.action_path }}/scripts/git_config.sh
-        shell: bash
-      - name: Inject code and deploy
-        run: |
-          # If an app name is not provided, use the repository name as the app name
-          if [ -z "$APP_NAME" ]; then
-            repository="${{ github.repository }}"
-            APP_NAME=${repository#*/}
-          fi
-          PATH="$HOME/bin:$PATH" CREATE_APP='true' deploy_alias=${{ inputs.deploy_alias }} $SCRIPTS_PATH/deploy.sh $APP_NAME
-        env:
-          DE_HOST: ${{inputs.DE_HOST}}
-          DE_PASSWORD: ${{inputs.DE_PASSWORD}}
-          DE_USERNAME: ${{inputs.DE_USERNAME}}
-          APP_NAME: ${{ inputs.app_name }}
-          SCRIPTS_PATH: ${{ github.action_path }}/scripts
-      - name: Generate comment for PR
-        id: changed
-        if: github.event_name == 'pull_request' && github.event.pull_request
-        shell: bash
-        run: ${{ github.action_path }}/scripts/generate_comment.sh
-      - name: Check for existing comment
-        uses: peter-evans/find-comment@v1
-        id: fc
-        if: github.event_name == 'pull_request' && github.event.pull_request
-        with:
-          issue-number: ${{ github.event.pull_request.number }}
-          comment-author: 'github-actions[bot]'
-      - name: Post comment
-        if: steps.fc.outputs.comment-id == '' && github.event_name == 'pull_request' && github.event.pull_request
-        uses: peter-evans/create-or-update-comment@v2
-        with:
-          issue-number: ${{ github.event.pull_request.number }}
-          body-file: 'message.md'
-      - name: Update comment
-        if: steps.fc.outputs.comment-id != '' && github.event_name == 'pull_request' && github.event.pull_request
-        uses: peter-evans/create-or-update-comment@v2
-        with:
-          comment-id: ${{ steps.fc.outputs.comment-id }}
-          edit-mode: replace
-          body-file: 'message.md'
+description: Dash Enterprise Deploy
+inputs:
+  DE_PASSWORD:
+    required: true
+  DE_HOST:
+    required: true
+  DE_USERNAME:
+    required: true
+  ACCESS_TOKEN:
+    required: true
+  app_name:
+    required: false
+    type: string
+runs:
+  using: composite
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.x'
+    - name: Install dekn-cli-python
+      run: |
+        git config --global url."https://${TOKEN}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+        python -m pip install --upgrade pip
+        pip install git+https://github.com/plotly/dekn-cli-python.git
+      env:
+        TOKEN: ${{ inputs.ACCESS_TOKEN }}
+    - name: Set up git config
+      run: ${{ github.action_path }}/scripts/git_config.sh
+      shell: bash
+    - name: Inject code and deploy
+      run: |
+        # If an app name is not provided, use the repository name as the app name
+        if [ -z "$APP_NAME" ]; then
+          repository="${{ github.repository }}"
+          APP_NAME=${repository#*/}
+        fi
+        PATH="$HOME/bin:$PATH" CREATE_APP='true' deploy_alias=${{ inputs.deploy_alias }} $SCRIPTS_PATH/deploy.sh $APP_NAME
+      env:
+        DE_HOST: ${{inputs.DE_HOST}}
+        DE_PASSWORD: ${{inputs.DE_PASSWORD}}
+        DE_USERNAME: ${{inputs.DE_USERNAME}}
+        APP_NAME: ${{ inputs.app_name }}
+        SCRIPTS_PATH: ${{ github.action_path }}/scripts
+    - name: Generate comment for PR
+      id: changed
+      if: github.event_name == 'pull_request' && github.event.pull_request
+      shell: bash
+      run: ${{ github.action_path }}/scripts/generate_comment.sh
+    - name: Check for existing comment
+      uses: peter-evans/find-comment@v1
+      id: fc
+      if: github.event_name == 'pull_request' && github.event.pull_request
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        comment-author: 'github-actions[bot]'
+    - name: Post comment
+      if: steps.fc.outputs.comment-id == '' && github.event_name == 'pull_request' && github.event.pull_request
+      uses: peter-evans/create-or-update-comment@v2
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        body-file: 'message.md'
+    - name: Update comment
+      if: steps.fc.outputs.comment-id != '' && github.event_name == 'pull_request' && github.event.pull_request
+      uses: peter-evans/create-or-update-comment@v2
+      with:
+        comment-id: ${{ steps.fc.outputs.comment-id }}
+        edit-mode: replace
+        body-file: 'message.md'
       
 
 branding:
