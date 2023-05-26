@@ -41,6 +41,7 @@ runs:
         DE_USERNAME: ${{inputs.DE_USERNAME}}
         APP_NAME: ${{ inputs.app_name }}
         SCRIPTS_PATH: ${{ github.action_path }}/scripts
+        EVENT_NUMBER: ${{github.event.number}}
     - name: Generate comment for PR
       id: changed
       if: github.event_name == 'pull_request' && github.event.pull_request
@@ -52,6 +53,7 @@ runs:
         DE_HOST: ${{inputs.DE_HOST}}
         APP_NAME: ${{ inputs.app_name }}
         SCRIPTS_PATH: ${{ github.action_path }}/scripts
+        EVENT_NUMBER: ${{github.event.number}}
     - name: Check for existing comment
       uses: peter-evans/find-comment@v1
       id: fc
