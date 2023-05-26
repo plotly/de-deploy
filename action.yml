@@ -7,7 +7,7 @@ inputs:
     required: true
   DE_USERNAME:
     required: true
-  ACCESS_TOKEN:
+  GITHUB_ACCESS_TOKEN:
     required: true
   app_name:
     required: false
@@ -22,11 +22,11 @@ runs:
     - name: Install dekn-cli-python
       shell: bash
       run: |
-        git config --global url."https://${TOKEN}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+        git config --global url."https://${GITHUB_ACCESS_TOKEN}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
         python -m pip install --upgrade pip
         pip install git+https://github.com/plotly/dekn-cli-python.git
       env:
-        TOKEN: ${{ inputs.ACCESS_TOKEN }}
+        GITHUB_ACCESS_TOKEN: ${{ inputs.GITHUB_ACCESS_TOKEN }}
     - name: Set up git config
       shell: bash
       run: ${{ github.action_path }}/scripts/git_config.sh
