@@ -1,4 +1,4 @@
-# Netlify Deploy
+# Dash Enteprise Deploy
 
 This is a GitHub Action to deploy a Dash application to Dash Enterprise 5.
 
