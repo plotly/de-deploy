@@ -56,8 +56,6 @@ runs:
       if: github.event_name == 'pull_request' && github.event.pull_request
       shell: bash
       run: ${{ github.action_path }}/scripts/generate_comment.sh
-      env:
-        SHA: ${{ github.sha }}
     - name: Check for existing comment
       uses: peter-evans/find-comment@v1
       id: fc
