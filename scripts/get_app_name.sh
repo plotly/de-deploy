@@ -10,7 +10,7 @@ fi
 # Add the PR number as a suffix for deploy previews
 if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
     sep="-"
-    APP_NAME=$APP_NAME$sep$EVENT_NUMBER
+    APP_NAME=$APP_NAME-$EVENT_NUMBER
 fi
 
 echo $APP_NAME
