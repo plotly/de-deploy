@@ -69,7 +69,7 @@ main() {
 
   log-header "Deploying $with_alias"  
   
-  APP=$with_alias METHOD="CREATE" python $ACTION_PATH/manage_apps.py
+  APP=$with_alias METHOD="CREATE" python $SCRIPTS_PATH/manage_apps.py
 
   # Disable sslverification
   git config --global http.sslVerify false
