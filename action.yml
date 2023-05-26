@@ -84,7 +84,6 @@ runs:
       if: github.event.action == 'closed'
       run: |
         APP_NAME=$("$SCRIPTS_PATH/get_app_name.sh")
-        echo $APP_NAME
         APP=$APP_NAME METHOD="DELETE" python ${{ github.action_path }}/scripts/manage_apps.py
       env:
         DE_PASSWORD: ${{inputs.DE_PASSWORD}}
@@ -92,6 +91,7 @@ runs:
         DE_USERNAME: ${{inputs.DE_USERNAME}}
         APP_NAME: ${{ inputs.app_name }}
         SCRIPTS_PATH: ${{ github.action_path }}/scripts
+        EVENT_NUMBER: ${{github.event.number}}
     - name: Check for existing comment
       uses: peter-evans/find-comment@v2
       id: fo
