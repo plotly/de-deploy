@@ -4,13 +4,13 @@ set -eo pipefail
 
 # If an app name is not provided, use the repository name as the app name
 if [ -z "$APP_NAME" ]; then
-    repository="${{ github.repository }}"
+    repository="$GITHUB_REPOSITORY"
     APP_NAME=${repository#*/}
 fi
 # Add the PR number as a suffix for deploy previews
-if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
     sep="-"
-    APP_NAME=$APP_NAME$sep${{github.event.number}}
+    APP_NAME=$APP_NAME$sep$GITHUB_EVENT_NUMBER
 fi
 
 echo $APP_NAME
