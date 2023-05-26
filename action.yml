@@ -86,14 +86,14 @@ runs:
         DE_USERNAME: ${{inputs.DE_USERNAME}}
         APP_NAME: ${{ inputs.app_name }}
     - name: Check for existing comment
-      uses: peter-evans/find-comment@v1
+      uses: peter-evans/find-comment@v2
       id: f_old
       with:
         issue-number: ${{ github.event.pull_request.number }}
         comment-author: 'github-actions[bot]'
     - name: Update existing comment
       if: steps.f_old.outputs.comment-id != ''
-      uses: peter-evans/create-or-update-comment@v1
+      uses: peter-evans/create-or-update-comment@v2
       with:
         comment-id: ${{ steps.fc.outputs.comment-id }}
         edit-mode: replace
