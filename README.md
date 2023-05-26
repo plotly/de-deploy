@@ -42,7 +42,7 @@ The inputs this action uses are:
 | `GH_ACCESS_TOKEN` | `true` | N/A | An access token for Github. |
 | `DE_DEPLOY_TO_PROD` | `true` | `false` | Whether to deploy to the production namespace or to a deploy preview. |
 | `app_name` | `false` | Repository name | The slug name for the application on DE. |
-| `deploy_alias` | `false` | `None` | A suffix/alias for the application. The application will be deployed to `${app_name}-${deploy_alias}`. |
+| `app_directory` | `false` | `${{ github.workspace }}` | The directory of the application. This might be modified if you are using this Action to manage a monorepo. |
 
 
 ## Example
@@ -60,11 +60,10 @@ on:
 
 jobs:
   deploy:
-    name: 'Deploy'
+    name: 'Deploy to Dash Enterprise'
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v1
       - uses: plotly/de5-deploy@main
         with:
           DE_HOST: ${{ secrets.DE_HOST }}
@@ -76,16 +75,18 @@ jobs:
 ### Preview Deploy on pull request
 Will deploy branches as `https://${DE_HOST}/${APP_NAME}-${event_number}`, e.g. if you are deploying an app called `inventory-analytics` to `example.plotly.host` and your PR number is `15`, the deploy preview would be available at `https://example.plotly.host/inventory-analytics-15` and would be redeployed on every new commit.
 
+Notice that this will run on `type` `closed`. This is because the Action will run garbage collection and remove the preview application when a PR is closed/merged to save resources on Dash Enterprise.
+
 ```yml
 name: 'Dash Enterprise Preview Deploy'
 
 on:
   pull_request:
-    types: ['opened', 'edited', 'synchronize']
+    types: ['opened', 'edited', 'synchronize', 'closed']
 
 jobs:
   deploy:
-    name: 'Deploy'
+    name: 'Preview deploy'
     runs-on: ubuntu-latest
 
     steps:
@@ -96,5 +97,4 @@ jobs:
           DE_USERNAME: ${{ secrets.DE_USERNAME }}
           DE_PASSWORD: ${{ secrets.DE_PASSWORD }}
           GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
-          DE_DEPLOY_TO_PROD: false
 ```
