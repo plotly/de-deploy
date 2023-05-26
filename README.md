@@ -8,23 +8,22 @@ To use a GitHub action you can just reference it on your Workflow file
 (for more info check [this article by Github](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/configuring-a-workflow))
 
 ```yml
-name: 'My Workflow'
+name: 'Dash Enterprise Deploy'
 
 on:
-  release:
-    types: [published]
+  push:
+    branches: [main]
 
 jobs:
   deploy:
     name: 'Deploy to Dash Enterprise'
     steps:
-      - uses: plotly/de5-deploy
+      - uses: plotly/de5-deploy@latest
         with:
           DE_HOST: ${{ secrets.DE_HOST }}
           DE_USERNAME: ${{ secrets.DE_USERNAME }}
           DE_PASSWORD: ${{ secrets.DE_PASSWORD }}
           GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
-
 ```
 
 ### Inputs
@@ -65,7 +64,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
-      - uses: plotly/de5-deploy
+      - uses: plotly/de5-deploy@latest
         with:
           DE_HOST: ${{ secrets.DE_HOST }}
           DE_USERNAME: ${{ secrets.DE_USERNAME }}
@@ -90,12 +89,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
-      - uses: plotly/de5-deploy
+      - uses: plotly/de5-deploy@latest
         with:
           DE_HOST: ${{ secrets.DE_HOST }}
           DE_USERNAME: ${{ secrets.DE_USERNAME }}
           DE_PASSWORD: ${{ secrets.DE_PASSWORD }}
           GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+          DE_DEPLOY_TO_PROD: false
 ```
 
 ### Use branch name to deploy
