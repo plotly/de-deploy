@@ -38,6 +38,12 @@ runs:
           repository="${{ github.repository }}"
           APP_NAME=${repository#*/}
         fi
+        # Add the PR number as a suffix for deploy previews
+        if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+          sep="-"
+          APP_NAME=$APP_NAME$sep${{github.event.number}}
+        fi
+
         PATH="$HOME/bin:$PATH" CREATE_APP='true' deploy_alias=${{ inputs.deploy_alias }} $SCRIPTS_PATH/deploy.sh $APP_NAME
       env:
         DE_HOST: ${{inputs.DE_HOST}}
