@@ -38,10 +38,6 @@ log-exit() {
 fn-check-env() {
   declare APP="$1"
 
-  if grep -Fxq "$APP" "$SOURCE_DIR/.deployignore"; then
-    log-exit "App $APP is in the .deployignore file, skipping deploy"
-  fi
-
   if [[ -z "$DE_USERNAME" ]]; then
     log-fail "DE_USERNAME is not defined"
   fi
