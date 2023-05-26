@@ -32,6 +32,7 @@ runs:
       run: ${{ github.action_path }}/scripts/git_config.sh
     - name: Inject code and deploy
       shell: bash
+      if: github.event.action != 'closed'
       run: |
         APP_NAME=$("$SCRIPTS_PATH/get_app_name.sh")
         PATH="$HOME/bin:$PATH" CREATE_APP='true' deploy_alias=${{ inputs.deploy_alias }} $SCRIPTS_PATH/deploy.sh $APP_NAME
@@ -44,7 +45,7 @@ runs:
         EVENT_NUMBER: ${{github.event.number}}
     - name: Generate comment for PR
       id: changed
-      if: github.event_name == 'pull_request' && github.event.pull_request
+      if: github.event_name == 'pull_request' && github.event.pull_request && github.event.action != 'closed'
       shell: bash
       run: |
         APP_NAME=$("$SCRIPTS_PATH/get_app_name.sh")
@@ -57,23 +58,46 @@ runs:
     - name: Check for existing comment
       uses: peter-evans/find-comment@v1
       id: fc
-      if: github.event_name == 'pull_request' && github.event.pull_request
+      if: github.event_name == 'pull_request' && github.event.pull_request && github.event.action != 'closed'
       with:
         issue-number: ${{ github.event.pull_request.number }}
         comment-author: 'github-actions[bot]'
     - name: Post comment
-      if: steps.fc.outputs.comment-id == '' && github.event_name == 'pull_request' && github.event.pull_request
+      if: steps.fc.outputs.comment-id == '' && github.event_name == 'pull_request' && github.event.pull_request && github.event.action != 'closed'
       uses: peter-evans/create-or-update-comment@v2
       with:
         issue-number: ${{ github.event.pull_request.number }}
         body-file: 'message.md'
     - name: Update comment
-      if: steps.fc.outputs.comment-id != '' && github.event_name == 'pull_request' && github.event.pull_request
+      if: steps.fc.outputs.comment-id != '' && github.event_name == 'pull_request' && github.event.pull_request && github.event.action != 'closed'
       uses: peter-evans/create-or-update-comment@v2
       with:
         comment-id: ${{ steps.fc.outputs.comment-id }}
         edit-mode: replace
         body-file: 'message.md'
+    - name: Remove any staging applications
+      run: |
+        APP_NAME=$("$SCRIPTS_PATH/get_app_name.sh")
+        APP=$APP_NAME METHOD="DELETE" python ${{ github.action_path }}/scripts/manage_apps.py
+      env:
+        DE_PASSWORD: ${{secrets.DASH_ENTERPRISE_PASSWORD}}
+        DE_HOST: ${{secrets.DASH_ENTERPRISE_HOST}}
+        DE_USERNAME: ${{secrets.DASH_ENTERPRISE_USERNAME}}
+        APP_NAME: ${{ inputs.app_name }}
+    - name: Check for existing comment
+      uses: peter-evans/find-comment@v1
+      id: fc
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        comment-author: 'github-actions[bot]'
+    - name: Update existing comment
+      if: steps.fc.outputs.comment-id != ''
+      uses: peter-evans/create-or-update-comment@v1
+      with:
+        comment-id: ${{ steps.fc.outputs.comment-id }}
+        edit-mode: replace
+        body: |
+          Any staging application deployed from this PR has been removed.
       
 
 branding:
