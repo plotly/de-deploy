@@ -12,6 +12,9 @@ inputs:
   app_name:
     required: false
     type: string
+  app_directory:
+    required: false
+    default: ${{ github.workspace }}
 runs:
   using: composite
   steps:
@@ -43,6 +46,7 @@ runs:
         APP_NAME: ${{ inputs.app_name }}
         SCRIPTS_PATH: ${{ github.action_path }}/scripts
         EVENT_NUMBER: ${{github.event.number}}
+        APP_DIRECTORY: ${{ inputs.app_directory }}
     - name: Generate comment for PR
       id: changed
       if: github.event_name == 'pull_request' && github.event.pull_request && github.event.action != 'closed'

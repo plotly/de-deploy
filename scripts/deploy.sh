@@ -2,12 +2,6 @@
 [[ -n "$TRACE" ]] && set -x
 set -eo pipefail
 
-readonly SOURCE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-echo $SOURCE_DIR
-readonly APPS_DIR_RELATIVE="${APPS_DIR_RELATIVE:-/}"
-echo $APPS_DIR_RELATIVE
-readonly APP_DIR="${APPS_DIR:-${SOURCE_DIR}${APPS_DIR_RELATIVE}}"
-echo $APP_DIR
 readonly CREATE_APP="${CREATE_APP:-false}"
 
 log-header() {
@@ -78,7 +72,7 @@ main() {
   # Disable sslverification
   git config --global http.sslVerify false
 
-  pushd "$APP_DIR" >/dev/null
+  pushd "$APP_DIRECTORY" >/dev/null
   git init -q
   git remote rm origin 2>/dev/null || true
   git remote add "plotly" "$remote_url"
@@ -86,7 +80,7 @@ main() {
   git commit -qm "Deployed commit: $GITHUB_SHA"
   popd >/dev/null
 
-  pushd "$APP_DIR" >/dev/null
+  pushd "$APP_DIRECTORY" >/dev/null
   log-header "Deploying $with_alias via force push"
   git push --force plotly master
   rm -rf ".git" >/dev/null
