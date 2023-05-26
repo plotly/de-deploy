@@ -3,9 +3,11 @@
 set -eo pipefail
 
 readonly SOURCE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+echo $SOURCE_DIR
 readonly APPS_DIR_RELATIVE="${APPS_DIR_RELATIVE:-/}"
+echo $APPS_DIR_RELATIVE
 readonly APPS_DIR="${APPS_DIR:-${SOURCE_DIR}${APPS_DIR_RELATIVE}}"
-readonly DE_HOST="${DE_HOST}"
+echo $APPS_DIR_RELATIVE
 readonly CREATE_APP="${CREATE_APP:-false}"
 
 log-header() {

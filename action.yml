@@ -56,7 +56,7 @@ runs:
         SCRIPTS_PATH: ${{ github.action_path }}/scripts
         EVENT_NUMBER: ${{github.event.number}}
     - name: Check for existing comment
-      uses: peter-evans/find-comment@v1
+      uses: peter-evans/find-comment@v2
       id: fc
       if: github.event_name == 'pull_request' && github.event.pull_request && github.event.action != 'closed'
       with:
