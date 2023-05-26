@@ -76,13 +76,14 @@ runs:
         edit-mode: replace
         body-file: 'message.md'
     - name: Remove any staging applications
+      shell: bash
       run: |
         APP_NAME=$("$SCRIPTS_PATH/get_app_name.sh")
         APP=$APP_NAME METHOD="DELETE" python ${{ github.action_path }}/scripts/manage_apps.py
       env:
-        DE_PASSWORD: ${{secrets.DASH_ENTERPRISE_PASSWORD}}
-        DE_HOST: ${{secrets.DASH_ENTERPRISE_HOST}}
-        DE_USERNAME: ${{secrets.DASH_ENTERPRISE_USERNAME}}
+        DE_PASSWORD: ${{secrets.DE_PASSWORD}}
+        DE_HOST: ${{secrets.DE_HOST}}
+        DE_USERNAME: ${{secrets.DE_USERNAME}}
         APP_NAME: ${{ inputs.app_name }}
     - name: Check for existing comment
       uses: peter-evans/find-comment@v1
