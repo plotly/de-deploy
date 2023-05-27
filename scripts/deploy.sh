@@ -53,22 +53,29 @@ fn-check-env() {
 
 main() {
   declare APP="$1"
-  local with_alias="$APP"
-  local remote_url="https://$DE_HOST/GIT/$with_alias"
-  local app_created=false
-  local force_push=true
-  local push_code=false
+  local remote_url="https://$DE_HOST/GIT/$APP"
   local exit_code remote_sha
 
   fn-check-env "$APP"
 
-  log-header "Deploying $with_alias"  
+  # Get list of directories changed in the most recent commit
+  changed_files="$(git diff --name-only HEAD HEAD~1)"
+  changed_dirs="$(cut -d/ -f1 <<< "$changed_files" | sort -u)"
+  # Check whether:
+  # - This app was changed in the most recent commit (i.e. it does not need to be redeployed)
+  # - The app directory is not the root (i.e. it is likely a monorepo and it is relevant to avoid redundant deploys)
+  # - The app does not exist on the server already (i.e. it does not need to be initialized)
+  if [[ ! grep -Fxq "$APP" <<< "$changed_dirs" && "$APP_DIRECTORY" != "" && "$(APP="$APP" METHOD="PUSH" python ./manage_apps.py)" != "true" ]]; then
+    log-header "🤜 App $APP exists and was not updated in latest commit, skipping deploy"
+    log-info "Check app out at https://$DE_HOST/$APP/"
+    return 0
+  fi
+
+  log-header "Deploying $APP..."  
+  APP=$APP METHOD="CREATE" python $SCRIPTS_PATH/manage_apps.py
 
   # Remove existing git information
   rm -rf .git
-
-  APP=$with_alias METHOD="CREATE" python $SCRIPTS_PATH/manage_apps.py
-
   # Disable sslverification
   git config --global http.sslVerify false
 
@@ -81,7 +88,7 @@ main() {
   popd >/dev/null
 
   pushd "$APP_DIRECTORY" >/dev/null
-  log-header "Deploying $with_alias via force push"
+  log-header "Deploying $APP via force push"
   git push --force plotly master
   rm -rf ".git" >/dev/null
   popd >/dev/null
