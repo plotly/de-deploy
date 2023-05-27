@@ -73,12 +73,12 @@ main() {
   log-header "Deploying $APP..."  
   APP=$APP METHOD="CREATE" python $SCRIPTS_PATH/manage_apps.py
 
-  # Remove existing git information
-  rm -rf .git
   # Disable sslverification
   git config --global http.sslVerify false
 
   pushd "$APP_DIRECTORY" >/dev/null
+  # Remove existing git information
+  rm -rf .git
   git init -q
   git remote rm origin 2>/dev/null || true
   git remote add "plotly" "$remote_url"
