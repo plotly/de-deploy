@@ -64,7 +64,7 @@ main() {
   # Check whether this app was changed in the most recent commit (i.e. it does not need to be redeployed)
   # Check whether the app directory is not the root (i.e. it is likely a monorepo and it is relevant to avoid redundant deploys)
   # Check whether the app does not already exist on the server (i.e. it does not need to be initialized)
-  if ! grep -Fxq "$APP" <<< "$changed_dirs" && [[ "$APP_DIRECTORY" != "" ]] && [[ "$(APP="$APP" METHOD="PUSH" python ./manage_apps.py)" != "true" ]]; then
+  if ! grep -Fxq "$APP" <<< "$changed_dirs" && [[ "$APP_DIRECTORY" != "" ]] && [[ "$(APP="$APP" METHOD="PUSH" python $SCRIPTS_PATH/manage_apps.py)" != "true" ]]; then
     log-header "🤜 App $APP exists and was not updated in latest commit, skipping deploy"
     log-info "Check app out at https://$DE_HOST/$APP/"
     return 0
