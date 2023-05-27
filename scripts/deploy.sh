@@ -79,6 +79,22 @@ main() {
   git push --force plotly master
   rm -rf ".git" >/dev/null
   popd >/dev/null
+
+  # Set outputs
+  DE_LOGS_URL="https://$DE_HOST/apps/$APP#logs"
+  DE_LIVE_URL="https://$DE_HOST/$APP"
+
+  echo "DE_LOGS_URL<<EOF" >> $GITHUB_ENV
+  echo "$DE_LOGS_URL" >> $GITHUB_ENV
+  echo "EOF" >> $GITHUB_ENV
+
+  echo "DE_LIVE_URL<<EOF" >> $GITHUB_ENV
+  echo "$DE_LIVE_URL" >> $GITHUB_ENV
+  echo "EOF" >> $GITHUB_ENV
+
+  log-header "🤜 App $APP has been deployed!"
+  log-info "Check app out at https://$DE_HOST/$APP/"
+
 }
 
 main "$@"

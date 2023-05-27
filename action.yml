@@ -15,6 +15,7 @@ inputs:
   app_directory:
     required: false
     default: ${{ github.workspace }}
+    
 runs:
   using: composite
   steps:
