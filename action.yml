@@ -38,7 +38,7 @@ runs:
       if: github.event.action != 'closed'
       run: |
         APP_NAME=$("$SCRIPTS_PATH/get_app_name.sh")
-        PATH="$HOME/bin:$PATH" CREATE_APP='true' deploy_alias=${{ inputs.deploy_alias }} $SCRIPTS_PATH/deploy.sh $APP_NAME
+        PATH="$HOME/bin:$PATH" CREATE_APP='true' $SCRIPTS_PATH/deploy.sh $APP_NAME
       env:
         DE_HOST: ${{inputs.DE_HOST}}
         DE_PASSWORD: ${{inputs.DE_PASSWORD}}

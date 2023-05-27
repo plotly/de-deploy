@@ -53,7 +53,7 @@ fn-check-env() {
 
 main() {
   declare APP="$1"
-  local with_alias="$APP$deploy_alias"
+  local with_alias="$APP"
   local remote_url="https://$DE_HOST/GIT/$with_alias"
   local app_created=false
   local force_push=true
