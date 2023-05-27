@@ -61,11 +61,10 @@ main() {
   # Get list of directories changed in the most recent commit
   changed_files="$(git diff --name-only HEAD HEAD~1)"
   changed_dirs="$(cut -d/ -f1 <<< "$changed_files" | sort -u)"
-  # Check whether:
-  # - This app was changed in the most recent commit (i.e. it does not need to be redeployed)
-  # - The app directory is not the root (i.e. it is likely a monorepo and it is relevant to avoid redundant deploys)
-  # - The app does not exist on the server already (i.e. it does not need to be initialized)
-  if [[ ! grep -Fxq "$APP" <<< "$changed_dirs" && "$APP_DIRECTORY" != "" && "$(APP="$APP" METHOD="PUSH" python ./manage_apps.py)" != "true" ]]; then
+  # Check whether this app was changed in the most recent commit (i.e. it does not need to be redeployed)
+  # Check whether the app directory is not the root (i.e. it is likely a monorepo and it is relevant to avoid redundant deploys)
+  # Check whether the app does not already exist on the server (i.e. it does not need to be initialized)
+  if ! grep -Fxq "$APP" <<< "$changed_dirs" && [[ "$APP_DIRECTORY" != "" ]] && [[ "$(APP="$APP" METHOD="PUSH" python ./manage_apps.py)" != "true" ]]; then
     log-header "🤜 App $APP exists and was not updated in latest commit, skipping deploy"
     log-info "Check app out at https://$DE_HOST/$APP/"
     return 0
