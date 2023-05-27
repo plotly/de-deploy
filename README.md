@@ -131,3 +131,79 @@ jobs:
           DE_PASSWORD: ${{ secrets.DE_PASSWORD }}
           GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
 ```
+
+## Usage with a monorepo
+This Action can be used with a monorepo by constructing a matrix of changed applications and passing that matrix to `de5-deploy`.
+
+Notice the `find_changed_apps` job, which will find all app names (i.e. directories) and filter by directories changed in the most recent commit which do not appear in a helperfile specifying apps to ignore on deploy (by default `.deployignore`.)
+
+Each app name is then passed to `de5-deploy` as a matrix.
+
+```yml
+name: Production deploy
+on:
+  push:
+    branches:
+      - main
+jobs:
+  find_changed_apps:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+    - uses: actions/checkout@v1
+    - id: set-matrix
+      run: |
+        # Get the list of directories changed in the most recent commit
+        changed_files="$(git diff --name-only HEAD HEAD~1 -- "$APPS_DIRECTORY")"
+        # Create a list of changed directories (apps) and ignore hidden directories
+        APPS="$(cut -d/ -f1 <<< "$changed_files" | grep -v '^\.' | sort -u)"
+
+        # Remove any apps which are in the deploy ignore file
+        [[ -f "$DEPLOYIGNORE" ]] && APPS=$(grep -vFf "$DEPLOYIGNORE" <<< "$APPS")
+
+        # Convert to JSON (making sure to properly handle the case where there are no changed directories)
+        if [ -z "$APPS" ]; then
+            apps_matrix='{"app_name": []}'
+        else
+            apps_matrix=$(printf '{"app_name": %s}' "[$(printf '"%s",' $APPS)]")
+        fi
+
+        # Store JSON as step output for use as a matrix
+        echo "::set-output name=matrix::$apps_matrix"
+      env:
+        APPS_DIRECTORY: ${{ github.workspace }}
+        DEPLOYIGNORE: ".deployignore"
+  deploy_changed_apps:
+    needs: find_changed_apps
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{fromJson(needs.find_changed_apps.outputs.matrix)}}
+    steps:
+      - uses: actions/checkout@v1
+      - uses: plotly/de5-deploy@main
+        with:
+          DE_HOST: ${{ secrets.DASH_ENTERPRISE_HOST }}
+          DE_USERNAME: ${{ secrets.DASH_ENTERPRISE_USERNAME }}
+          DE_PASSWORD: ${{ secrets.DASH_ENTERPRISE_PASSWORD }}
+          GH_ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          app_name: ${{ matrix.app_name }}
+          app_directory: ./${{ matrix.app_name }}
+```
+
+A side effect to note is that if this is used with the pattern:
+```
+on:
+  pull_request:
+    types: ['opened', 'edited', 'synchronize', 'closed']
+```
+
+It will work properly (including garbage collection), but comments with links will overwrite each other.
+
+It is also worth noting that because this only fetches apps which were changed, it will not force the deploy if an app does not exist on the server and has not been changed in the last repository commit. To force the deploy of all directories on every commit, `$APPS` might be defined as:
+```
+# Get the list of directories & trim trailing slashes
+APPS=$(cd $SUBDIRECTORY && ls -d */ | sed 's/\/$//' | sort -u)
+```
+
+Note this might have performance drawbacks and may only be reasonably to apply for commits to `main` rather than in pull requests.
