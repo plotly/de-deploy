@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - uses: plotly/de5-deploy@main
+      - uses: plotly/de-deploy@main
         with:
           DE_HOST: ${{ secrets.DE_HOST }}
           DE_USERNAME: ${{ secrets.DE_USERNAME }}
@@ -67,7 +67,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
-      - uses: plotly/de5-deploy@main
+      - uses: plotly/de-deploy@main
         with:
           DE_HOST: ${{ secrets.DE_HOST }}
           DE_USERNAME: ${{ secrets.DE_USERNAME }}
@@ -93,7 +93,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
-      - uses: plotly/de5-deploy@main
+      - uses: plotly/de-deploy@main
         with:
           DE_HOST: ${{ secrets.DE_HOST }}
           DE_USERNAME: ${{ secrets.DE_USERNAME }}
@@ -124,7 +124,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
-      - uses: plotly/de5-deploy@main
+      - uses: plotly/de-deploy@main
         with:
           DE_HOST: ${{ secrets.DE_HOST }}
           DE_USERNAME: ${{ secrets.DE_USERNAME }}
@@ -133,11 +133,11 @@ jobs:
 ```
 
 ## Usage with a monorepo
-This Action can be used with a monorepo by constructing a matrix of changed applications and passing that matrix to `de5-deploy`.
+This Action can be used with a monorepo by constructing a matrix of changed applications and passing that matrix to `de-deploy`.
 
 Notice the `find_changed_apps` job, which will find all app names (i.e. directories) and filter by directories changed in the most recent commit which do not appear in a helperfile specifying apps to ignore on deploy (by default `.deployignore`.)
 
-Each app name is then passed to `de5-deploy` as a matrix.
+Each app name is then passed to `de-deploy` as a matrix.
 
 ```yml
 name: Production deploy
@@ -181,7 +181,7 @@ jobs:
       matrix: ${{fromJson(needs.find_changed_apps.outputs.matrix)}}
     steps:
       - uses: actions/checkout@v1
-      - uses: plotly/de5-deploy@main
+      - uses: plotly/de-deploy@main
         with:
           DE_HOST: ${{ secrets.DASH_ENTERPRISE_HOST }}
           DE_USERNAME: ${{ secrets.DASH_ENTERPRISE_USERNAME }}
