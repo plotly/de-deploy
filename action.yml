@@ -101,6 +101,7 @@ runs:
         DE_HOST: ${{inputs.DE_HOST}}
         APP_NAME: ${{ inputs.app_name }}
         EVENT_NUMBER: ${{github.event.number}}
+        SCRIPTS_PATH: ${{ github.action_path }}/scripts
     - name: Check Endpoint Status
       shell: bash
       run: |
