@@ -37,30 +37,35 @@ runs:
     - name: Set up git config
       shell: bash
       run: ${{ github.action_path }}/scripts/git_config.sh
+    - name: Generate app name
+      id: appname
+      shell: bash
+      run: |
+        APP_NAME=$("$SCRIPTS_PATH/get_app_name.sh")
+        echo "::set-output name=app_name::$APP_NAME"
+      env:
+        APP_NAME: ${{ inputs.app_name }}
+        SCRIPTS_PATH: ${{ github.action_path }}/scripts
+        EVENT_NUMBER: ${{github.event.number}}
     - name: Inject code and deploy
       shell: bash
       if: github.event.action != 'closed'
       run: |
-        APP_NAME=$("$SCRIPTS_PATH/get_app_name.sh")
-        PATH="$HOME/bin:$PATH" CREATE_APP='true' $SCRIPTS_PATH/deploy.sh $APP_NAME
+        PATH="$HOME/bin:$PATH" CREATE_APP='true' $SCRIPTS_PATH/deploy.sh ${{ steps.appname.outputs.app_name }}
       env:
         DE_HOST: ${{inputs.DE_HOST}}
         DE_PASSWORD: ${{inputs.DE_PASSWORD}}
         DE_USERNAME: ${{inputs.DE_USERNAME}}
-        APP_NAME: ${{ inputs.app_name }}
-        SCRIPTS_PATH: ${{ github.action_path }}/scripts
-        EVENT_NUMBER: ${{github.event.number}}
         APP_DIRECTORY: ${{ inputs.app_directory }}
     - name: Check build status
       id: poll
       shell: bash
       run: |
-        APP_NAME=$("$SCRIPTS_PATH/get_app_name.sh")
         START_TIME=$(date +%s)
         # Start an infinite loop
         while true; do
           # Check the application status
-          STATUS=$(APP=$APP_NAME METHOD="DEPLOY_STATUS" python $SCRIPTS_PATH/manage_apps.py)
+          STATUS=$(APP=${{ steps.appname.outputs.app_name }} METHOD="DEPLOY_STATUS" python $SCRIPTS_PATH/manage_apps.py)
 
           # Check if the status is in a finished state or if we have reached the timeout limit
           if [[ "$STATUS" == "built" || "$STATUS" == "failed" || "$STATUS" == "cancelled" || $(( $(date +%s) - START_TIME )) -gt $TIMEOUT ]]; then
@@ -74,47 +79,22 @@ runs:
         DE_HOST: ${{inputs.DE_HOST}}
         DE_PASSWORD: ${{inputs.DE_PASSWORD}}
         DE_USERNAME: ${{inputs.DE_USERNAME}}
-        APP_NAME: ${{ inputs.app_name }}
-        EVENT_NUMBER: ${{github.event.number}}
-        SCRIPTS_PATH: ${{ github.action_path }}/scripts
         TIMEOUT: ${{ inputs.timeout }}
     - name: Remove staging application
       shell: bash
       if: github.event.action == 'closed'
       run: |
-        APP_NAME=$("$SCRIPTS_PATH/get_app_name.sh")
-        APP=$APP_NAME METHOD="DELETE" python ${{ github.action_path }}/scripts/manage_apps.py
+        APP=${{ steps.appname.outputs.app_name }} METHOD="DELETE" python ${{ github.action_path }}/scripts/manage_apps.py
       env:
         DE_PASSWORD: ${{inputs.DE_PASSWORD}}
         DE_HOST: ${{inputs.DE_HOST}}
         DE_USERNAME: ${{inputs.DE_USERNAME}}
-        APP_NAME: ${{ inputs.app_name }}
-        SCRIPTS_PATH: ${{ github.action_path }}/scripts
-        EVENT_NUMBER: ${{github.event.number}}
-    - name: Publish application URL
-      shell: bash
-      run: |
-        APP_NAME=$("$SCRIPTS_PATH/get_app_name.sh")
-
-        SHA=$(git rev-parse HEAD)
-        RESPONSE=$(curl -s -X GET \
-          -H "Authorization: Bearer $GITHUB_TOKEN" \
-          "https://api.github.com/repos/${{ github.repository }}/commits/$SHA/check-runs?filter=latest")
-        
-        CHECK_RUN_ID=$(echo "$RESPONSE" | jq -r '.check_runs[0].id')
-        DETAILS_URL="https://${DE_HOST}/apps/${APP_NAME}"
-        
-        curl -s -X PATCH \
-          -H "Authorization: Bearer $GITHUB_TOKEN" \
-          -H "Accept: application/vnd.github.antiope-preview+json" \
-          -H "Content-Type: application/json" \
-          -d "{\"details_url\":\"$DETAILS_URL\"}" \
-          "https://api.github.com/repos/${{ github.repository }}/check-runs/$CHECK_RUN_ID"
+     - uses: LouisBrunner/checks-action@v1.6.0
+       with:
+        token: $GITHUB_TOKEN
+        details_url: "https://$DE_HOST/apps/${{ steps.appname.outputs.app_name }}"
       env:
         DE_HOST: ${{inputs.DE_HOST}}
-        APP_NAME: ${{ inputs.app_name }}
-        EVENT_NUMBER: ${{github.event.number}}
-        SCRIPTS_PATH: ${{ github.action_path }}/scripts
     - name: Check Endpoint Status
       shell: bash
       run: |
