@@ -45,11 +45,10 @@ The inputs this action uses are:
 | `DE_USERNAME` | `true` | N/A | The username to deploy under. This user will be the application owner (it is recommended to configure a service user for automated deploys, e.g. `bot`) |
 | `DE_PASSWORD` | `true` | N/A | The password for the specified user. |
 | `GH_ACCESS_TOKEN` | `true` | N/A | A [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) for Github. Required to install `dekn-cli-python`. |
+| `token` | `true` | N/A | The repository Github Token, usually `${{ secrets.GITHUB_TOKEN }}` |
 | `app_name` | `false` | Repository name | The slug name for the application on DE. |
 | `app_directory` | `false` | `${{ github.workspace }}` | The directory of the application. This might be modified if you are using this Action to manage a monorepo. |
 | `timeout` | `false` | `300` | The time (in seconds) to poll the app deploy status for completion before the Action is considered failed. For applications with long build times, this might be incremented. |
-
-
 
 ## Examples
 This workflow can be used to stagger your deployments between a deploy preview on a per-PR basis, followed by deployment to pre-prod on merge to `main`, followed by deployment to prod on `release`. For projects with less emphasis on production, it is sufficient to have two workflows: First for staging with PRs, followed by deployment to production on merge to `main`. The examples could be adapted for either workflow.
@@ -77,6 +76,7 @@ jobs:
           DE_USERNAME: ${{ secrets.DE_USERNAME }}
           DE_PASSWORD: ${{ secrets.DE_PASSWORD }}
           GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 
@@ -103,6 +103,7 @@ jobs:
           DE_USERNAME: ${{ secrets.DE_USERNAME }}
           DE_PASSWORD: ${{ secrets.DE_PASSWORD }}
           GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           app_name: example-dash-app-preprod
 ```
 
@@ -134,6 +135,7 @@ jobs:
           DE_USERNAME: ${{ secrets.DE_USERNAME }}
           DE_PASSWORD: ${{ secrets.DE_PASSWORD }}
           GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 ## Usage with a monorepo
@@ -191,6 +193,7 @@ jobs:
           DE_USERNAME: ${{ secrets.DASH_ENTERPRISE_USERNAME }}
           DE_PASSWORD: ${{ secrets.DASH_ENTERPRISE_PASSWORD }}
           GH_ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           app_name: ${{ matrix.app_name }}
           app_directory: ./${{ matrix.app_name }}
 ```
