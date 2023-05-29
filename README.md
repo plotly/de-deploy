@@ -2,6 +2,8 @@
 
 This is a GitHub Action to deploy a Dash application to Dash Enterprise 5.
 
+Under the hood, it uses https://github.com/plotly/dekn-cli-python :rocket:
+
 ## Usage
 
 To use a GitHub action you can just reference it on your Workflow file
