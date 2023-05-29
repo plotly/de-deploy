@@ -57,7 +57,7 @@ runs:
         # Start an infinite loop
         while true; do
           # Check the application status
-          STATUS=$APP_NAME METHOD="DEPLOY_STATUS" python $SCRIPTS_PATH/manage_apps.py
+          STATUS=APP=$APP_NAME METHOD="DEPLOY_STATUS" python $SCRIPTS_PATH/manage_apps.py
 
           $ Check if the status is in a finished state or if we have reached out timeout
           if [[ "$STATUS" == "built" || "$STATUS" == "failed" || "$STATUS" == "cancelled" || $(( $(date +%s) - START_TIME )) -gt $TIMEOUT ]]; then
