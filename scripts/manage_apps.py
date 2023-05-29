@@ -1,6 +1,8 @@
 from dekn_cli import DashEnterprise
 
 import os
+from functools import reduce
+from datetime import datetime
 
 connection = DashEnterprise(
     host=os.environ.get("DE_HOST"),
@@ -30,3 +32,17 @@ elif METHOD == "CREATE":
             APP,
             title=title,
         )
+
+elif METHOD == "DEPLOY_STATUS":
+    info = connection.appInfo(APP)
+
+    builds = info["builds"]
+
+    def compare_build_times(x, y):
+        x = datetime.strptime(x["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ")
+        y = datetime.strptime(y["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ")
+        return x if x > y else y
+
+    latest_build = reduce(compare_build_times, builds)
+
+    print(latest_build["status"])
