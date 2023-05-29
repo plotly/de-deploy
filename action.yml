@@ -95,11 +95,21 @@ runs:
       shell: bash
       run: |
         APP_NAME=$("$SCRIPTS_PATH/get_app_name.sh")
-        curl \
-          -X POST \
-          -H "Accept: application/vnd.github.v3+json" \
-          https://api.github.com/repos/octocat/hello-world/check-runs \
-          -d '{"name":"name","head_sha":"head_sha", "details_url": "https://$DE_HOST/apps/$APP_NAME"}'
+
+        SHA=$(git rev-parse HEAD)
+        RESPONSE=$(curl -s -X GET \
+          -H "Authorization: Bearer $GITHUB_TOKEN" \
+          "https://api.github.com/repos/${{ github.repository }}/commits/$SHA/check-runs?filter=latest")
+        
+        CHECK_RUN_ID=$(echo "$RESPONSE" | jq -r '.check_runs[0].id')
+        DETAILS_URL="https://${DE_HOST}/apps/${APP_NAME}"
+        
+        curl -s -X PATCH \
+          -H "Authorization: Bearer $GITHUB_TOKEN" \
+          -H "Accept: application/vnd.github.antiope-preview+json" \
+          -H "Content-Type: application/json" \
+          -d "{\"details_url\":\"$DETAILS_URL\"}" \
+          "https://api.github.com/repos/${{ github.repository }}/check-runs/$CHECK_RUN_ID"
       env:
         DE_HOST: ${{inputs.DE_HOST}}
         APP_NAME: ${{ inputs.app_name }}
