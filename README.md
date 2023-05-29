@@ -45,6 +45,8 @@ The inputs this action uses are:
 | `GH_ACCESS_TOKEN` | `true` | N/A | A [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) for Github. Required to install `dekn-cli-python`. |
 | `app_name` | `false` | Repository name | The slug name for the application on DE. |
 | `app_directory` | `false` | `${{ github.workspace }}` | The directory of the application. This might be modified if you are using this Action to manage a monorepo. |
+| `timeout` | `false` | `300` | The time (in seconds) to poll the app deploy status for completion before the Action is considered failed. For applications with long build times, this might be incremented. |
+
 
 
 ## Examples

@@ -15,6 +15,9 @@ inputs:
   app_directory:
     required: false
     default: ${{ github.workspace }}
+  timeout:
+    required: false
+    default: 300
     
 runs:
   using: composite
@@ -74,7 +77,7 @@ runs:
         APP_NAME: ${{ inputs.app_name }}
         EVENT_NUMBER: ${{github.event.number}}
         SCRIPTS_PATH: ${{ github.action_path }}/scripts
-        TIMEOUT: 300
+        TIMEOUT: ${{ inputs.timeout }}
     - name: Remove staging application
       shell: bash
       if: github.event.action == 'closed'
