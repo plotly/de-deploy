@@ -8,6 +8,7 @@ inputs:
   DE_USERNAME:
     required: true
   GH_ACCESS_TOKEN:
+    description: Github Personal Access token with permissions set to "repo".
     required: true
   app_name:
     required: false
@@ -36,12 +37,26 @@ runs:
         GH_ACCESS_TOKEN: ${{ inputs.GH_ACCESS_TOKEN }}
     - name: Set up git config
       shell: bash
-      run: ${{ github.action_path }}/scripts/git_config.sh
+      run: |
+        printf '#!/bin/bash\necho username=$DE_USERNAME\necho password=$DE_PASSWORD' >> helper-script.sh
+        git config --global credential.helper "/bin/bash $(pwd)/helper-script.sh"
+        git config --global user.email '<>' # Leave email blank
+        git config --global user.name "Github Automatic Deployer"
+        git config --global protocol.version 0
     - name: Generate app name
-      id: appname
+      id: app_name
       shell: bash
       run: |
-        APP_NAME=$("$SCRIPTS_PATH/get_app_name.sh")
+        # If an app name is not provided, use the repository name as the app name
+        if [ -z "$APP_NAME" ]; then
+            repository="$GITHUB_REPOSITORY"
+            APP_NAME=${repository#*/}
+        fi
+        # Add the PR number as a suffix for deploy previews
+        if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+            sep="-"
+            APP_NAME=$APP_NAME-$EVENT_NUMBER
+        fi
         echo "::set-output name=app_name::$APP_NAME"
       env:
         APP_NAME: ${{ inputs.app_name }}
@@ -51,24 +66,42 @@ runs:
       shell: bash
       if: github.event.action != 'closed'
       run: |
-        PATH="$HOME/bin:$PATH" CREATE_APP='true' $SCRIPTS_PATH/deploy.sh ${{ steps.appname.outputs.app_name }}
+        PATH="$HOME/bin:$PATH" CREATE_APP='true' $SCRIPTS_PATH/deploy.sh ${{ steps.app_name.outputs.app_name }}
       env:
         DE_HOST: ${{inputs.DE_HOST}}
         DE_PASSWORD: ${{inputs.DE_PASSWORD}}
         DE_USERNAME: ${{inputs.DE_USERNAME}}
         APP_DIRECTORY: ${{ inputs.app_directory }}
+        SCRIPTS_PATH: ${{ github.action_path }}/scripts
+    - name: Generate details link as commit status
+      shell: bash
+      run: |
+        curl -L \
+          -X POST \
+          -H "Accept: application/vnd.github+json"\
+          -H "Authorization: Bearer ${{inputs.GH_ACCESS_TOKEN}}"\
+          -H "X-GitHub-Api-Version: 2022-11-28"\
+          https://api.github.com/repos/${{ github.repository }}/statuses/${{github.event.pull_request.head.sha || github.sha}}\
+          -d '{"state":"success","target_url":"https://${{ inputs.DE_HOST }}/apps/${{ steps.app_name.outputs.app_name }}","description":"App manager ready!","context":"deploy/${{ steps.app_name.outputs.app_name }}"}'
     - name: Check build status
       id: poll
       shell: bash
       run: |
         START_TIME=$(date +%s)
         # Start an infinite loop
+        log-info() {
+          declare desc="Log info formatter";
+          echo "      $*"
+        }
+
         while true; do
           # Check the application status
-          STATUS=$(APP=${{ steps.appname.outputs.app_name }} METHOD="DEPLOY_STATUS" python $SCRIPTS_PATH/manage_apps.py)
-
+          STATUS=$(APP=${{ steps.app_name.outputs.app_name }} METHOD="DEPLOY_STATUS" python $SCRIPTS_PATH/manage_apps.py)
+          log-info "$(date): Application is $STATUS..."
           # Check if the status is in a finished state or if we have reached the timeout limit
           if [[ "$STATUS" == "built" || "$STATUS" == "failed" || "$STATUS" == "cancelled" || $(( $(date +%s) - START_TIME )) -gt $TIMEOUT ]]; then
+            log-info "$(date): Build has entered a finished state: $STATUS"
+            echo "::set-output name=status::$STATUS"
             break
           fi
 
@@ -80,26 +113,29 @@ runs:
         DE_PASSWORD: ${{inputs.DE_PASSWORD}}
         DE_USERNAME: ${{inputs.DE_USERNAME}}
         TIMEOUT: ${{ inputs.timeout }}
+        SCRIPTS_PATH: ${{ github.action_path }}/scripts
     - name: Remove staging application
       shell: bash
       if: github.event.action == 'closed'
       run: |
-        APP=${{ steps.appname.outputs.app_name }} METHOD="DELETE" python ${{ github.action_path }}/scripts/manage_apps.py
+        APP=${{ steps.app_name.outputs.app_name }} METHOD="DELETE" python $SCRIPTS_PATH/manage_apps.py
       env:
         DE_PASSWORD: ${{inputs.DE_PASSWORD}}
         DE_HOST: ${{inputs.DE_HOST}}
         DE_USERNAME: ${{inputs.DE_USERNAME}}
-     - uses: LouisBrunner/checks-action@v1.6.0
-       with:
-        token: $GITHUB_TOKEN
-        details_url: "https://$DE_HOST/apps/${{ steps.appname.outputs.app_name }}"
-      env:
-        DE_HOST: ${{inputs.DE_HOST}}
-    - name: Check Endpoint Status
+        SCRIPTS_PATH: ${{ github.action_path }}/scripts
+    - name: Generate details link
       shell: bash
       run: |
-        echo "Endpoint status: ${{ steps.poll.outputs.status }}"
-   
+        echo ${{ github.sha }}
+        curl -L \
+          -X POST \
+          -H "Accept: application/vnd.github+json"\
+          -H "Authorization: Bearer ${{inputs.token}}"\
+          -H "X-GitHub-Api-Version: 2022-11-28"\
+          https://api.github.com/repos/${{ github.repository }}/statuses/${{github.event.pull_request.head.sha || github.sha}}\
+          -d '{"state":"success","target_url":"https://${{ inputs.DE_HOST }}/apps/${{ steps.app_name.outputs.app_name }}","description":"App manager ready!","context":"deploy/${{ steps.app_name.outputs.app_name }}"}'
+          
 
 branding:
   icon: activity

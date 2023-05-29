@@ -92,8 +92,6 @@ main() {
   echo "$DE_LIVE_URL" >> $GITHUB_ENV
   echo "EOF" >> $GITHUB_ENV
 
-  log-header "🤜 App $APP has been deployed!"
-  log-info "Check app out at https://$DE_HOST/$APP/"
 
 }
 
