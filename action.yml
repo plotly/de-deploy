@@ -75,42 +75,6 @@ runs:
         EVENT_NUMBER: ${{github.event.number}}
         SCRIPTS_PATH: ${{ github.action_path }}/scripts
         TIMEOUT: 300
-    - name: Check Endpoint Status
-      shell: bash
-      run: |
-        echo "Endpoint status: ${{ steps.poll.outputs.status }}"
-    - name: Generate comment for PR
-      id: changed
-      if: github.event_name == 'pull_request' && github.event.pull_request && github.event.action != 'closed'
-      shell: bash
-      run: |
-        APP_NAME=$("$SCRIPTS_PATH/get_app_name.sh")
-        $SCRIPTS_PATH/generate_comment.sh
-      env:
-        DE_HOST: ${{inputs.DE_HOST}}
-        APP_NAME: ${{ inputs.app_name }}
-        SCRIPTS_PATH: ${{ github.action_path }}/scripts
-        EVENT_NUMBER: ${{github.event.number}}
-    - name: Check for existing comment
-      uses: peter-evans/find-comment@v2
-      id: fc
-      if: github.event_name == 'pull_request' && github.event.pull_request && github.event.action != 'closed'
-      with:
-        issue-number: ${{ github.event.pull_request.number }}
-        comment-author: 'github-actions[bot]'
-    - name: Post comment
-      if: steps.fc.outputs.comment-id == '' && github.event_name == 'pull_request' && github.event.pull_request && github.event.action != 'closed'
-      uses: peter-evans/create-or-update-comment@v2
-      with:
-        issue-number: ${{ github.event.pull_request.number }}
-        body-file: 'message.md'
-    - name: Update comment
-      if: steps.fc.outputs.comment-id != '' && github.event_name == 'pull_request' && github.event.pull_request && github.event.action != 'closed'
-      uses: peter-evans/create-or-update-comment@v2
-      with:
-        comment-id: ${{ steps.fc.outputs.comment-id }}
-        edit-mode: replace
-        body-file: 'message.md'
     - name: Remove staging application
       shell: bash
       if: github.event.action == 'closed'
@@ -124,22 +88,25 @@ runs:
         APP_NAME: ${{ inputs.app_name }}
         SCRIPTS_PATH: ${{ github.action_path }}/scripts
         EVENT_NUMBER: ${{github.event.number}}
-    - name: Check for existing comment
-      uses: peter-evans/find-comment@v2
-      id: fo
-      if: github.event.action == 'closed'
-      with:
-        issue-number: ${{ github.event.pull_request.number }}
-        comment-author: 'github-actions[bot]'
-    - name: Update existing comment
-      if: steps.fo.outputs.comment-id != '' && github.event.action == 'closed'
-      uses: peter-evans/create-or-update-comment@v2
-      with:
-        comment-id: ${{ steps.fo.outputs.comment-id }}
-        edit-mode: replace
-        body: |
-          Any staging application deployed from this PR has been removed.
-      
+    - name: Publish application URL
+      shell: bash
+      run: |
+        APP_NAME=$("$SCRIPTS_PATH/get_app_name.sh")
+        curl \
+          -X POST \
+          -H "Accept: application/vnd.github.v3+json" \
+          https://api.github.com/repos/octocat/hello-world/check-runs \
+          -d '{"name":"name","head_sha":"head_sha", "details_url": "https://$DE_HOST/apps/$APP_NAME"}'
+      env:
+        DE_HOST: ${{inputs.DE_HOST}}
+        APP_NAME: ${{ inputs.app_name }}
+        EVENT_NUMBER: ${{github.event.number}}
+        SCRIPTS_PATH: ${{ github.action_path }}/scripts
+    - name: Check Endpoint Status
+      shell: bash
+      run: |
+        echo "Endpoint status: ${{ steps.poll.outputs.status }}"
+   
 
 branding:
   icon: activity
