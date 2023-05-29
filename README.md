@@ -2,6 +2,8 @@
 
 This is a GitHub Action to deploy a Dash application to Dash Enterprise 5.
 
+Under the hood, it uses https://github.com/plotly/dekn-cli-python :rocket:
+
 ## Usage
 
 To use a GitHub action you can just reference it on your Workflow file
@@ -192,7 +194,7 @@ jobs:
 ```
 
 A side effect to note is that if this is used with the pattern:
-```
+```yml
 on:
   pull_request:
     types: ['opened', 'edited', 'synchronize', 'closed']
@@ -201,9 +203,9 @@ on:
 It will work properly (including garbage collection), but comments with links will overwrite each other.
 
 It is also worth noting that because this only fetches apps which were changed, it will not force the deploy if an app does not exist on the server and has not been changed in the last repository commit. To force the deploy of all directories on every commit, `$APPS` might be defined as:
-```
+```bash
 # Get the list of directories & trim trailing slashes
-APPS=$(cd $SUBDIRECTORY && ls -d */ | sed 's/\/$//' | sort -u)
+APPS=$(cd $APPS_DIRECTORY && ls -d */ | sed 's/\/$//' | sort -u)
 ```
 
 Note this might have performance drawbacks and may only be reasonably to apply for commits to `main` rather than in pull requests.
