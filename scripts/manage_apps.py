@@ -39,6 +39,7 @@ elif METHOD == "DEPLOY_STATUS":
     builds = info["builds"]
 
     def compare_build_times(x, y):
+        print(x, y)
         x = datetime.strptime(x["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ")
         y = datetime.strptime(y["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ")
         return x if x > y else y
