@@ -48,6 +48,37 @@ runs:
         SCRIPTS_PATH: ${{ github.action_path }}/scripts
         EVENT_NUMBER: ${{github.event.number}}
         APP_DIRECTORY: ${{ inputs.app_directory }}
+    - name: Check build status
+      id: poll
+      shell: bash
+      run: |
+        APP_NAME=$("$SCRIPTS_PATH/get_app_name.sh")
+        START_TIME=$(date +%s)
+        # Start an infinite loop
+        while true; do
+          # Check the application status
+          STATUS=$(APP=$APP_NAME METHOD="DEPLOY_STATUS" python $SCRIPTS_PATH/manage_apps.py)
+
+          # Check if the status is in a finished state or if we have reached the timeout limit
+          if [[ "$STATUS" == "built" || "$STATUS" == "failed" || "$STATUS" == "cancelled" || $(( $(date +%s) - START_TIME )) -gt $TIMEOUT ]]; then
+            break
+          fi
+
+          # Sleep for a few seconds before the next iteration
+          sleep 5
+        done
+      env:
+        DE_HOST: ${{inputs.DE_HOST}}
+        DE_PASSWORD: ${{inputs.DE_PASSWORD}}
+        DE_USERNAME: ${{inputs.DE_USERNAME}}
+        APP_NAME: ${{ inputs.app_name }}
+        EVENT_NUMBER: ${{github.event.number}}
+        SCRIPTS_PATH: ${{ github.action_path }}/scripts
+        TIMEOUT: 300
+    - name: Check Endpoint Status
+      shell: bash
+      run: |
+        echo "Endpoint status: ${{ steps.poll.outputs.status }}"
     - name: Generate comment for PR
       id: changed
       if: github.event_name == 'pull_request' && github.event.pull_request && github.event.action != 'closed'
