@@ -59,7 +59,7 @@ runs:
           # Check the application status
           STATUS=$(APP=$APP_NAME METHOD="DEPLOY_STATUS" python $SCRIPTS_PATH/manage_apps.py)
 
-          $ Check if the status is in a finished state or if we have reached out timeout
+          # Check if the status is in a finished state or if we have reached the timeout limit
           if [[ "$STATUS" == "built" || "$STATUS" == "failed" || "$STATUS" == "cancelled" || $(( $(date +%s) - START_TIME )) -gt $TIMEOUT ]]; then
             break
           fi
