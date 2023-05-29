@@ -68,6 +68,9 @@ runs:
           sleep 5
         done
       env:
+        DE_HOST: ${{inputs.DE_HOST}}
+        DE_PASSWORD: ${{inputs.DE_PASSWORD}}
+        DE_USERNAME: ${{inputs.DE_USERNAME}}
         APP_NAME: ${{ inputs.app_name }}
         SCRIPTS_PATH: ${{ github.action_path }}/scripts
         TIMEOUT: 300
