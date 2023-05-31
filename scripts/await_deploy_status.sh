@@ -3,6 +3,7 @@
 set -eo pipefail
 
 START_TIME=$(date +%s)
+
 log-info() {
     declare desc="Log info formatter";
     echo "      $*"
@@ -20,7 +21,7 @@ while true; do
     log-info "$(date): Application is $STATUS..."
 
     # If build fails, fail the CI
-    if [[ "$STATUS" == "failed" || $(( $(date +%s) - START_TIME )) -gt $TIMEOUT]]; then
+    if [[ "$STATUS" == "failed" || $(( $(date +%s) - START_TIME )) -gt $TIMEOUT ]]; then
         log-fail "$(date): Application build failed or await timed out. Refer to the app manager for logs and additional information."
     fi
 
@@ -30,7 +31,6 @@ while true; do
         break
     fi
     
-
     # Sleep for a few seconds before the next iteration
     sleep 5
 done
