@@ -21,14 +21,13 @@ while true; do
 
     # Check if the status is in a finished state or if we have reached the timeout limit
     if [[ "$STATUS" == "built" || "$STATUS" == "failed" || "$STATUS" == "cancelled" || $(( $(date +%s) - START_TIME )) -gt $TIMEOUT ]]; then
-    log-info "$(date): Build has entered a finished state: $STATUS"
+        log-info "$(date): Build has entered a finished state: $STATUS"
+        break
+    fi
     
     # If build
-    if ["$STATUS" == "failed"]; then
+    if [ "$STATUS" == "failed" ]; then
         log-fail "$(date): Application build failed. Refer to the app manager for logs and additional information."
-    fi
-
-    break
     fi
 
     # Sleep for a few seconds before the next iteration

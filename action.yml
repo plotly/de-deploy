@@ -75,6 +75,7 @@ runs:
         SCRIPTS_PATH: ${{ github.action_path }}/scripts
     - name: Generate details link as commit status
       shell: bash
+      if: github.event.action != 'closed'
       run: |
         echo ${{ github.sha }}
         curl -L \
