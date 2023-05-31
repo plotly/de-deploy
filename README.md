@@ -137,7 +137,7 @@ This Action can be used with a monorepo by constructing a matrix of changed appl
 
 Notice the `find_changed_apps` job, which will find all app names (i.e. directories) and filter by directories changed in the most recent commit which do not appear in a helperfile specifying apps to ignore on deploy (by default `.deployignore`.)
 
-Each app name is then passed to `de-deploy` as a matrix.
+Each app name is then passed to `de-deploy` as a matrix. We disable `fail-fast` because the failure of one app build does not imply the failure of all app builds.
 
 ```yml
 name: Production deploy
@@ -150,6 +150,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
+      fail-fast: false
     steps:
     - uses: actions/checkout@v1
     - id: set-matrix
