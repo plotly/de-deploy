@@ -93,6 +93,7 @@ runs:
         DE_USERNAME: ${{inputs.DE_USERNAME}}
         TIMEOUT: ${{ inputs.timeout }}
         SCRIPTS_PATH: ${{ github.action_path }}/scripts
+        APP_NAME: ${{ steps.app_name.outputs.app_name }}
     - name: Remove staging application
       shell: bash
       if: github.event.action == 'closed'
