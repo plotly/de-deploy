@@ -44,10 +44,10 @@ The inputs this action uses are:
 | `DE_HOST` | `true` | N/A | The hostname of the DE instance, e.g. `example.plotly.host`. |
 | `DE_USERNAME` | `true` | N/A | The username to deploy under. This user will be the application owner (it is recommended to configure a service user for automated deploys, e.g. `bot`) |
 | `DE_PASSWORD` | `true` | N/A | The password for the specified user. |
-| `GH_ACCESS_TOKEN` | `true` | N/A | A [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) for Github. Required to install `dekn-cli-python`. |
+| `GH_ACCESS_TOKEN` | `true` | N/A | A [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) for Github. Required to install `dekn-cli-python` and for commit status. Permissions should be set to `repo`. |
 | `app_name` | `false` | Repository name | The slug name for the application on DE. |
 | `app_directory` | `false` | `${{ github.workspace }}` | The directory of the application. This might be modified if you are using this Action to manage a monorepo. |
-
+| `timeout` | `false` | `300` | The time (in seconds) to poll the app deploy status for completion before the Action is considered failed. For applications with long build times, this might be incremented. |
 
 ## Examples
 This workflow can be used to stagger your deployments between a deploy preview on a per-PR basis, followed by deployment to pre-prod on merge to `main`, followed by deployment to prod on `release`. For projects with less emphasis on production, it is sufficient to have two workflows: First for staging with PRs, followed by deployment to production on merge to `main`. The examples could be adapted for either workflow.
@@ -139,7 +139,7 @@ This Action can be used with a monorepo by constructing a matrix of changed appl
 
 Notice the `find_changed_apps` job, which will find all app names (i.e. directories) and filter by directories changed in the most recent commit which do not appear in a helperfile specifying apps to ignore on deploy (by default `.deployignore`.)
 
-Each app name is then passed to `de-deploy` as a matrix.
+Each app name is then passed to `de-deploy` as a matrix. We disable `fail-fast` because the failure of one app build does not imply the failure of all app builds.
 
 ```yml
 name: Production deploy
@@ -152,6 +152,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
+      fail-fast: false
     steps:
     - uses: actions/checkout@v1
     - id: set-matrix
