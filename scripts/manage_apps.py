@@ -1,4 +1,4 @@
-from dekn_cli import DashEnterprise
+from dekn_client import DashEnterprise
 
 import os
 from functools import reduce

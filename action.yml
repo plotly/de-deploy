@@ -27,12 +27,12 @@ runs:
       uses: actions/setup-python@v3
       with:
         python-version: '3.x'
-    - name: Install dekn-cli-python
+    - name: Install dekn-client
       shell: bash
       run: |
         git config --global url."https://${GH_ACCESS_TOKEN}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
         python -m pip install --upgrade pip
-        pip install git+https://github.com/plotly/dekn-cli-python.git
+        pip install git+https://github.com/plotly/dekn-client.git
       env:
         GH_ACCESS_TOKEN: ${{ inputs.GH_ACCESS_TOKEN }}
     - name: Set up git config
