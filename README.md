@@ -194,14 +194,14 @@ jobs:
           app_directory: ./${{ matrix.app_name }}
 ```
 
-A side effect to note is that if this is used with the pattern:
+This can also be used with the `on` pattern:
 ```yml
 on:
   pull_request:
     types: ['opened', 'edited', 'synchronize', 'closed']
 ```
 
-It will work properly (including garbage collection), but comments with links will overwrite each other.
+To create preview deploys for changed apps.
 
 It is also worth noting that because this only fetches apps which were changed, it will not force the deploy if an app does not exist on the server and has not been changed in the last repository commit. To force the deploy of all directories on every commit, `$APPS` might be defined as:
 ```bash
@@ -209,4 +209,4 @@ It is also worth noting that because this only fetches apps which were changed, 
 APPS=$(cd $APPS_DIRECTORY && ls -d */ | sed 's/\/$//' | sort -u)
 ```
 
-Note this might have performance drawbacks and may only be reasonably to apply for commits to `main` rather than in pull requests.
+Note this might have performance drawbacks.
