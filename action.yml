@@ -77,9 +77,9 @@ runs:
       shell: bash
       run: ${{ github.action_path }}/await_deploy_status.sh
       env:
-        DE_HOST: ${{inputs.DE_HOST}}
-        DE_PASSWORD: ${{inputs.DE_PASSWORD}}
-        DE_USERNAME: ${{inputs.DE_USERNAME}}
+        DASH_ENTERPRISE_HOST: ${{inputs.DE_HOST}}
+        DASH_ENTERPRISE_PASSWORD: ${{inputs.DE_PASSWORD}}
+        DASH_ENTERPRISE_USERNAME: ${{inputs.DE_USERNAME}}
         TIMEOUT: ${{ inputs.timeout }}
         APP_NAME: ${{ steps.app_name.outputs.app_name }}
     - name: Remove staging application
@@ -88,9 +88,9 @@ runs:
       run: |
         dekn apps delete --name ${{ steps.app_name.outputs.app_name }}
       env:
-        DE_PASSWORD: ${{inputs.DE_PASSWORD}}
-        DE_HOST: ${{inputs.DE_HOST}}
-        DE_USERNAME: ${{inputs.DE_USERNAME}}
+        DASH_ENTERPRISE_PASSWORD: ${{inputs.DE_PASSWORD}}
+        DASH_ENTERPRISE_HOST: ${{inputs.DE_HOST}}
+        DASH_ENTERPRISE_USERNAME: ${{inputs.DE_USERNAME}}
 
 
 branding:
