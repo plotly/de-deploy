@@ -57,7 +57,7 @@ runs:
       shell: bash
       if: github.event.action != 'closed'
       run: |
-        dekn deploy . --name ${{ steps.app_name.outputs.app_name }} -fv
+        dekn deploy . --name ${{ steps.app_name.outputs.app_name }} --message "Deployed commit: $GITHUB_SHA"  -fv
       env:
         DASH_ENTERPRISE_HOST: ${{inputs.DE_HOST}}
         DASH_ENTERPRISE_PASSWORD: ${{inputs.DE_PASSWORD}}
