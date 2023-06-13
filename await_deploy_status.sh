@@ -17,7 +17,7 @@ log-fail() {
 # Start an infinite loop
 while true; do
     # Check the application status
-    STATUS=$(APP=$APP_NAME METHOD="DEPLOY_STATUS" python $SCRIPTS_PATH/manage_apps.py)
+    STATUS=$(dekn apps status --name $APP_NAME)
     log-info "$(date): Application is $STATUS..."
 
     # If build fails, fail the CI
