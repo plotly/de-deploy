@@ -16,6 +16,10 @@ inputs:
   app_directory:
     required: false
     default: ${{ github.workspace }}
+  group_viewers:
+    required: false
+  group_editors:
+    required: false
   timeout:
     required: false
     default: 300
@@ -35,14 +39,6 @@ runs:
         pip install git+https://github.com/plotly/dekn-client.git
       env:
         GH_ACCESS_TOKEN: ${{ inputs.GH_ACCESS_TOKEN }}
-    - name: Set up git config
-      shell: bash
-      run: |
-        printf '#!/bin/bash\necho username=$DE_USERNAME\necho password=$DE_PASSWORD' >> helper-script.sh
-        git config --global credential.helper "/bin/bash $(pwd)/helper-script.sh"
-        git config --global user.email '<>' # Leave email blank
-        git config --global user.name "Github Automatic Deployer"
-        git config --global protocol.version 0
     - name: Generate app name
       id: app_name
       shell: bash
@@ -60,19 +56,17 @@ runs:
         echo "::set-output name=app_name::$APP_NAME"
       env:
         APP_NAME: ${{ inputs.app_name }}
-        SCRIPTS_PATH: ${{ github.action_path }}/scripts
         EVENT_NUMBER: ${{github.event.number}}
     - name: Inject code and deploy
       shell: bash
       if: github.event.action != 'closed'
       run: |
-        PATH="$HOME/bin:$PATH" CREATE_APP='true' $SCRIPTS_PATH/deploy.sh ${{ steps.app_name.outputs.app_name }}
+        dekn deploy ${{ inputs.app_directory }} --name ${{ steps.app_name.outputs.app_name }} --message "Deployed commit: $GITHUB_SHA" -fv
+        dekn apps update --name ${{ inputs.app_directory }} --group-editors ${{ inputs.group_editors }} --group-viewers ${{ inputs.group_viewers }}
       env:
-        DE_HOST: ${{inputs.DE_HOST}}
-        DE_PASSWORD: ${{inputs.DE_PASSWORD}}
-        DE_USERNAME: ${{inputs.DE_USERNAME}}
-        APP_DIRECTORY: ${{ inputs.app_directory }}
-        SCRIPTS_PATH: ${{ github.action_path }}/scripts
+        DASH_ENTERPRISE_HOST: ${{inputs.DE_HOST}}
+        DASH_ENTERPRISE_PASSWORD: ${{inputs.DE_PASSWORD}}
+        DASH_ENTERPRISE_USERNAME: ${{inputs.DE_USERNAME}}
     - name: Generate details link as commit status
       shell: bash
       if: github.event.action != 'closed'
@@ -86,24 +80,22 @@ runs:
           -d '{"state":"success","target_url":"https://${{ inputs.DE_HOST }}/apps/${{ steps.app_name.outputs.app_name }}","description":"App manager ready!","context":"deploy/${{ steps.app_name.outputs.app_name }}"}'
     - name: Await build status
       shell: bash
-      run: ${{ github.action_path }}/scripts/await_deploy_status.sh
+      run: ${{ github.action_path }}/await_deploy_status.sh
       env:
-        DE_HOST: ${{inputs.DE_HOST}}
-        DE_PASSWORD: ${{inputs.DE_PASSWORD}}
-        DE_USERNAME: ${{inputs.DE_USERNAME}}
+        DASH_ENTERPRISE_HOST: ${{inputs.DE_HOST}}
+        DASH_ENTERPRISE_PASSWORD: ${{inputs.DE_PASSWORD}}
+        DASH_ENTERPRISE_USERNAME: ${{inputs.DE_USERNAME}}
         TIMEOUT: ${{ inputs.timeout }}
-        SCRIPTS_PATH: ${{ github.action_path }}/scripts
         APP_NAME: ${{ steps.app_name.outputs.app_name }}
     - name: Remove staging application
       shell: bash
       if: github.event.action == 'closed'
       run: |
-        APP=${{ steps.app_name.outputs.app_name }} METHOD="DELETE" python $SCRIPTS_PATH/manage_apps.py
+        dekn apps delete --name ${{ steps.app_name.outputs.app_name }}
       env:
-        DE_PASSWORD: ${{inputs.DE_PASSWORD}}
-        DE_HOST: ${{inputs.DE_HOST}}
-        DE_USERNAME: ${{inputs.DE_USERNAME}}
-        SCRIPTS_PATH: ${{ github.action_path }}/scripts
+        DASH_ENTERPRISE_PASSWORD: ${{inputs.DE_PASSWORD}}
+        DASH_ENTERPRISE_HOST: ${{inputs.DE_HOST}}
+        DASH_ENTERPRISE_USERNAME: ${{inputs.DE_USERNAME}}
 
 
 branding:
