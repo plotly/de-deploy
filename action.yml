@@ -16,6 +16,10 @@ inputs:
   app_directory:
     required: false
     default: ${{ github.workspace }}
+  group_viewers:
+    required: false
+  group_editors:
+    required: false
   timeout:
     required: false
     default: 300
@@ -57,7 +61,8 @@ runs:
       shell: bash
       if: github.event.action != 'closed'
       run: |
-        dekn deploy ${{ inputs.app_directory }} --name ${{ steps.app_name.outputs.app_name }} --message "Deployed commit: $GITHUB_SHA"  -fv
+        dekn deploy ${{ inputs.app_directory }} --name ${{ steps.app_name.outputs.app_name }} --message "Deployed commit: $GITHUB_SHA" -fv
+        dekn apps update --name ${{ inputs.app_directory }} --group-editors ${{ inputs.group_editors }} --group-viewers ${{ inputs.group_viewers }}
       env:
         DASH_ENTERPRISE_HOST: ${{inputs.DE_HOST}}
         DASH_ENTERPRISE_PASSWORD: ${{inputs.DE_PASSWORD}}
