@@ -63,10 +63,10 @@ runs:
       run: |
         dekn deploy ${{ inputs.app_directory }} --name ${{ steps.app_name.outputs.app_name }} --message "Deployed commit: $GITHUB_SHA" -fv
 
-        if [[ -n ${{ inputs.group_editors }} ]]; then
+        if [ -n ${{ inputs.group_editors }} ]; then
           dekn apps update --name ${{ steps.app_name.outputs.app_name }} --group-editors ${{ inputs.group_editors }}
         fi
-        if [[ -n ${{ inputs.group_viewers }} ]]; then
+        if [ -n ${{ inputs.group_viewers }} ]; then
           dekn apps update --name ${{ steps.app_name.outputs.app_name }} --group-viewers ${{ inputs.group_viewers }}
         fi
       env:
