@@ -62,7 +62,13 @@ runs:
       if: github.event.action != 'closed'
       run: |
         dekn deploy ${{ inputs.app_directory }} --name ${{ steps.app_name.outputs.app_name }} --message "Deployed commit: $GITHUB_SHA" -fv
-        dekn apps update --name ${{ inputs.app_directory }} --group-editors ${{ inputs.group_editors }} --group-viewers ${{ inputs.group_viewers }}
+
+        if [[ -n ${{ inputs.group_editors }} ]]; then
+          dekn apps update --name ${{ inputs.app_directory }} --group-editors ${{ inputs.group_editors }}
+        fi
+        if [[ -n ${{ inputs.group_viewers }} ]]; then
+          dekn apps update --name ${{ inputs.app_directory }} --group-viewers ${{ inputs.group_viewers }}
+        fi
       env:
         DASH_ENTERPRISE_HOST: ${{inputs.DE_HOST}}
         DASH_ENTERPRISE_PASSWORD: ${{inputs.DE_PASSWORD}}
