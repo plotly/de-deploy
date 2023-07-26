@@ -31,12 +31,12 @@ runs:
       uses: actions/setup-python@v3
       with:
         python-version: '3.x'
-    - name: Install dekn-client
+    - name: Install de-client
       shell: bash
       run: |
         git config --global url."https://${GH_ACCESS_TOKEN}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
         python -m pip install --upgrade pip
-        pip install git+https://github.com/plotly/dekn-client.git
+        pip install git+https://github.com/plotly/de-client.git
       env:
         GH_ACCESS_TOKEN: ${{ inputs.GH_ACCESS_TOKEN }}
     - name: Generate app name
@@ -61,13 +61,13 @@ runs:
       shell: bash
       if: github.event.action != 'closed'
       run: |
-        dekn deploy ${{ inputs.app_directory }} --name ${{ steps.app_name.outputs.app_name }} --message "Deployed commit: $GITHUB_SHA" -fv
+        de deploy ${{ inputs.app_directory }} --name ${{ steps.app_name.outputs.app_name }} --message "Deployed commit: $GITHUB_SHA" -fv
 
         if [ -n "${{ inputs.group_editors }}" ]; then
-          dekn apps update --name ${{ steps.app_name.outputs.app_name }} --group-editors ${{ inputs.group_editors }}
+          de apps update --name ${{ steps.app_name.outputs.app_name }} --group-editors ${{ inputs.group_editors }}
         fi
         if [ -n "${{ inputs.group_viewers }}" ]; then
-          dekn apps update --name ${{ steps.app_name.outputs.app_name }} --group-viewers ${{ inputs.group_viewers }}
+          de apps update --name ${{ steps.app_name.outputs.app_name }} --group-viewers ${{ inputs.group_viewers }}
         fi
       env:
         DASH_ENTERPRISE_HOST: ${{inputs.DE_HOST}}
@@ -97,7 +97,7 @@ runs:
       shell: bash
       if: github.event.action == 'closed'
       run: |
-        dekn apps delete --name ${{ steps.app_name.outputs.app_name }}
+        de apps delete --name ${{ steps.app_name.outputs.app_name }}
       env:
         DASH_ENTERPRISE_PASSWORD: ${{inputs.DE_PASSWORD}}
         DASH_ENTERPRISE_HOST: ${{inputs.DE_HOST}}
