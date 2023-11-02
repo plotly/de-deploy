@@ -36,6 +36,7 @@ runs:
       run: |
         git config --global url."https://${GH_ACCESS_TOKEN}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
         python -m pip install --upgrade pip
+        pip install aiohttp==3.9.0b0
         pip install git+https://github.com/plotly/de-client.git@v0.1.0
       env:
         GH_ACCESS_TOKEN: ${{ inputs.GH_ACCESS_TOKEN }}
