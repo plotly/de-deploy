@@ -82,8 +82,19 @@ runs:
       if: github.event.action != 'closed'
       run: |
         de --no-keyfile deploy ${{ inputs.app_directory }} --name ${{ steps.app_name.outputs.app_name }} --message "Deployed commit: $GITHUB_SHA" -fv
-        de --no-keyfile apps update --name ${{ steps.app_name.outputs.app_name }} --group-editor ${{ inputs.group_co_owners }}
-        de --no-keyfile apps update --name ${{ steps.app_name.outputs.app_name }} --group-viewer ${{ inputs.group_viewers }}
+        de --no-keyfile apps update --name ${{ steps.app_name.outputs.app_name }} --group-editor ${{ inputs.group_co_owners }} --group-viewer ${{ inputs.group_viewers }}
+
+        # Manage app services
+        if [[ "${{ inputs.create_redis }}" == "true" ]]; then
+            de --no-keyfile services create --app-name ${{ steps.app_name.outputs.app_name }} --type redis
+        fi
+        if [[ "${{ inputs.create_postgres }}" == "true" ]]; then
+            de --no-keyfile services create --app-name ${{ steps.app_name.outputs.app_name }} --type postgres
+        fi
+        if [[ "${{ inputs.create_persistent_filesystem }}" == "true" ]]; then
+            de --no-keyfile apps update --persistent-filesystem
+        fi
+        
       env:
         DASH_ENTERPRISE_HOST: ${{inputs.DE_HOST}}
         DASH_ENTERPRISE_PASSWORD: ${{inputs.DE_PASSWORD}}
