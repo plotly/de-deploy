@@ -83,18 +83,30 @@ runs:
       run: |
         de --no-keyfile deploy ${{ inputs.app_directory }} --name ${{ steps.app_name.outputs.app_name }} --message "Deployed commit: $GITHUB_SHA" -y
         de --no-keyfile apps update --name ${{ steps.app_name.outputs.app_name }} --group-editor ${{ inputs.group_co_owners }} --group-viewer ${{ inputs.group_viewers }}
-
-        # Manage app services
-        if [[ "${{ inputs.create_redis }}" == "true" ]]; then
-            de --no-keyfile services create --app-name ${{ steps.app_name.outputs.app_name }} --type redis
-        fi
-        if [[ "${{ inputs.create_postgres }}" == "true" ]]; then
-            de --no-keyfile services create --app-name ${{ steps.app_name.outputs.app_name }} --type postgres
-        fi
-        if [[ "${{ inputs.create_persistent_filesystem }}" == "true" ]]; then
-            de --no-keyfile apps update --persistent-filesystem
-        fi
-        
+      env:
+        DASH_ENTERPRISE_HOST: ${{inputs.DE_HOST}}
+        DASH_ENTERPRISE_PASSWORD: ${{inputs.DE_PASSWORD}}
+        DASH_ENTERPRISE_USERNAME: ${{inputs.DE_USERNAME}}
+    - name: Create Redis
+      if: ${{ inputs.create_redis }}
+      run: |
+        de --no-keyfile services create --app-name ${{ steps.app_name.outputs.app_name }} --type redis
+      env:
+        DASH_ENTERPRISE_HOST: ${{inputs.DE_HOST}}
+        DASH_ENTERPRISE_PASSWORD: ${{inputs.DE_PASSWORD}}
+        DASH_ENTERPRISE_USERNAME: ${{inputs.DE_USERNAME}}
+    - name: Create Postgres
+      if: ${{ inputs.create_postgres }}
+      run: |
+        de --no-keyfile services create --app-name ${{ steps.app_name.outputs.app_name }} --type postgres
+      env:
+        DASH_ENTERPRISE_HOST: ${{inputs.DE_HOST}}
+        DASH_ENTERPRISE_PASSWORD: ${{inputs.DE_PASSWORD}}
+        DASH_ENTERPRISE_USERNAME: ${{inputs.DE_USERNAME}}
+    - name: Create presistent filesystem
+      if: ${{ inputs.create_persistent_filesystem }}
+      run: |
+        de --no-keyfile apps update --persistent-filesystem
       env:
         DASH_ENTERPRISE_HOST: ${{inputs.DE_HOST}}
         DASH_ENTERPRISE_PASSWORD: ${{inputs.DE_PASSWORD}}
