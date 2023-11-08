@@ -86,9 +86,9 @@ runs:
           de --no-keyfile apps create -n $APP_NAME
         fi
       env:
-        DASH_ENTERPRISE_HOST: ${{ secrets.DE_HOST }}
-        DASH_ENTERPRISE_USERNAME: ${{ secrets.DE_USERNAME }}
-        DASH_ENTERPRISE_PASSWORD: ${{ secrets.DE_PASSWORD }}
+        DASH_ENTERPRISE_HOST: ${{ inputs.DE_HOST }}
+        DASH_ENTERPRISE_USERNAME: ${{ inputs.DE_USERNAME }}
+        DASH_ENTERPRISE_PASSWORD: ${{ inputs.DE_PASSWORD }}
         APP_NAME: ${{ steps.app_name.outputs.app_name }}
     - name: Create Redis
       shell: bash
