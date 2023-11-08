@@ -2,24 +2,51 @@ name: Dash Enterprise Deploy
 description: Dash Enterprise Deploy
 inputs:
   DE_PASSWORD:
+    description: Dash Enterprise password
     required: true
+    type: string
   DE_HOST:
+    description: Dash Enterprise host
     required: true
+    type: string
   DE_USERNAME:
+    description: Dash Enterprise username
     required: true
+    type: string
   GH_ACCESS_TOKEN:
     description: Github Personal Access token with permissions set to "repo".
     required: true
+    type: string
   app_name:
+    description: Name of the app to deploy. If not provided, the repository name will be used.
     required: false
     type: string
   app_directory:
+    description: Directory of the app to deploy. If not provided, the root directory will be used.
     required: false
     default: ${{ github.workspace }}
   group_viewers:
+    description: User groups to add as viewers to the app. If not provided, no groups will be added.
     required: false
-  group_editors:
+    type: strong
+  group_co_owners:
+    description: User groups to add as co-owners to the app. If not provided, no groups will be added.
+    type: boolean
     required: false
+  create_redis:
+    description: True to create a Redis instance for the app.
+    type: boolean
+    required: false
+  create_postgres:
+    description: True to create a Postgres instance for the app.
+    type: boolean
+    required: false
+  create_persistent_filesystem:
+    description: True to create a persistent filesystem for the app.
+    type: boolean
+    required: false
+  
+  
     
 runs:
   using: composite
@@ -55,7 +82,7 @@ runs:
       if: github.event.action != 'closed'
       run: |
         de --no-keyfile deploy ${{ inputs.app_directory }} --name ${{ steps.app_name.outputs.app_name }} --message "Deployed commit: $GITHUB_SHA" -fv
-        de --no-keyfile apps update --name ${{ steps.app_name.outputs.app_name }} --group-editor ${{ inputs.group_editors }}
+        de --no-keyfile apps update --name ${{ steps.app_name.outputs.app_name }} --group-editor ${{ inputs.group_co_owners }}
         de --no-keyfile apps update --name ${{ steps.app_name.outputs.app_name }} --group-viewer ${{ inputs.group_viewers }}
       env:
         DASH_ENTERPRISE_HOST: ${{inputs.DE_HOST}}
