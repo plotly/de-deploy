@@ -94,7 +94,7 @@ runs:
       shell: bash
       if: ${{ inputs.create_redis }}
       run: |
-        exists=$(de --no-keyfile services exists -n $APP -t redis)
+        exists=$(de --no-keyfile services exists -n ${{ steps.app_name.outputs.app_name }} -t redis)
         if [[ $exists == "False" ]]; then
           de --no-keyfile services create --app-name ${{ steps.app_name.outputs.app_name }} --type redis
         fi
@@ -106,7 +106,7 @@ runs:
       shell: bash
       if: ${{ inputs.create_postgres }}
       run: |
-        exists=$(de --no-keyfile services exists -n $APP -t postgres)
+        exists=$(de --no-keyfile services exists -n ${{ steps.app_name.outputs.app_name }} -t postgres)
         if [[ $exists == "False" ]]; then
           de --no-keyfile services create --app-name ${{ steps.app_name.outputs.app_name }} --type postgres
         fi
