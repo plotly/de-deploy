@@ -77,19 +77,19 @@ runs:
       env:
         APP_NAME: ${{ inputs.app_name }}
         EVENT_NUMBER: ${{github.event.number}}
-    - name: Reset environment
-        shell: bash
-        run: |
-          # Create the app if it does not already exist
-          exists=$(de --no-keyfile apps exists -n $APP)
-          if [[ $exists == *"App [$APP] does not exist on [$DASH_ENTERPRISE_HOST]."* ]]; then
-              de --no-keyfile apps create -n $APP
-          fi
-        env:
-          DASH_ENTERPRISE_HOST: ${{ secrets.DE_HOST }}
-          DASH_ENTERPRISE_USERNAME: ${{ secrets.DE_USERNAME }}
-          DASH_ENTERPRISE_PASSWORD: ${{ secrets.DE_PASSWORD }}
-          APP: ${{ steps.app_name.outputs.app_name }}
+    - name: Create app if it does not exist
+      shell: bash
+      run: |
+        # Create the app if it does not already exist
+        exists=$(de --no-keyfile apps exists -n $APP_NAME)
+        if [[ $exists == *"App [$APP_NAME] does not exist on [$DASH_ENTERPRISE_HOST]."* ]]; then
+          de --no-keyfile apps create -n $APP_NAME
+        fi
+      env:
+        DASH_ENTERPRISE_HOST: ${{ secrets.DE_HOST }}
+        DASH_ENTERPRISE_USERNAME: ${{ secrets.DE_USERNAME }}
+        DASH_ENTERPRISE_PASSWORD: ${{ secrets.DE_PASSWORD }}
+        APP_NAME: ${{ steps.app_name.outputs.app_name }}
     - name: Create Redis
       shell: bash
       if: ${{ inputs.create_redis }}
