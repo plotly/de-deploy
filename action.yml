@@ -81,7 +81,7 @@ runs:
       shell: bash
       if: github.event.action != 'closed'
       run: |
-        de --no-keyfile deploy ${{ inputs.app_directory }} --name ${{ steps.app_name.outputs.app_name }} --message "Deployed commit: $GITHUB_SHA" -fv
+        de --no-keyfile deploy ${{ inputs.app_directory }} --name ${{ steps.app_name.outputs.app_name }} --message "Deployed commit: $GITHUB_SHA" -y
         de --no-keyfile apps update --name ${{ steps.app_name.outputs.app_name }} --group-editor ${{ inputs.group_co_owners }} --group-viewer ${{ inputs.group_viewers }}
 
         # Manage app services
