@@ -90,6 +90,17 @@ runs:
         DASH_ENTERPRISE_USERNAME: ${{ inputs.DE_USERNAME }}
         DASH_ENTERPRISE_PASSWORD: ${{ inputs.DE_PASSWORD }}
         APP_NAME: ${{ steps.app_name.outputs.app_name }}
+    - name: Generate details link as commit status
+      shell: bash
+      if: github.event.action != 'closed'
+      run: |
+        curl -L \
+          -X POST \
+          -H "Accept: application/vnd.github+json"\
+          -H "Authorization: Bearer ${{inputs.GH_ACCESS_TOKEN}}"\
+          -H "X-GitHub-Api-Version: 2022-11-28"\
+          https://api.github.com/repos/${{ github.repository }}/statuses/${{github.event.pull_request.head.sha || github.sha}}\
+          -d '{"state":"success","target_url":"https://${{ inputs.DE_HOST }}/apps/${{ steps.app_name.outputs.app_name }}","description":"App manager ready!","context":"deploy/${{ steps.app_name.outputs.app_name }}"}'
     - name: Create Redis
       shell: bash
       if: ${{ inputs.create_redis }}
@@ -133,18 +144,6 @@ runs:
         DASH_ENTERPRISE_HOST: ${{inputs.DE_HOST}}
         DASH_ENTERPRISE_PASSWORD: ${{inputs.DE_PASSWORD}}
         DASH_ENTERPRISE_USERNAME: ${{inputs.DE_USERNAME}}
-
-    - name: Generate details link as commit status
-      shell: bash
-      if: github.event.action != 'closed'
-      run: |
-        curl -L \
-          -X POST \
-          -H "Accept: application/vnd.github+json"\
-          -H "Authorization: Bearer ${{inputs.GH_ACCESS_TOKEN}}"\
-          -H "X-GitHub-Api-Version: 2022-11-28"\
-          https://api.github.com/repos/${{ github.repository }}/statuses/${{github.event.pull_request.head.sha || github.sha}}\
-          -d '{"state":"success","target_url":"https://${{ inputs.DE_HOST }}/apps/${{ steps.app_name.outputs.app_name }}","description":"App manager ready!","context":"deploy/${{ steps.app_name.outputs.app_name }}"}'
     - name: Remove staging application
       shell: bash
       if: github.event.action == 'closed'
