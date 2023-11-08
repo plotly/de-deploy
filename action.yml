@@ -88,6 +88,7 @@ runs:
         DASH_ENTERPRISE_PASSWORD: ${{inputs.DE_PASSWORD}}
         DASH_ENTERPRISE_USERNAME: ${{inputs.DE_USERNAME}}
     - name: Create Redis
+      shell: bash
       if: ${{ inputs.create_redis }}
       run: |
         de --no-keyfile services create --app-name ${{ steps.app_name.outputs.app_name }} --type redis
@@ -96,6 +97,7 @@ runs:
         DASH_ENTERPRISE_PASSWORD: ${{inputs.DE_PASSWORD}}
         DASH_ENTERPRISE_USERNAME: ${{inputs.DE_USERNAME}}
     - name: Create Postgres
+      shell: bash
       if: ${{ inputs.create_postgres }}
       run: |
         de --no-keyfile services create --app-name ${{ steps.app_name.outputs.app_name }} --type postgres
@@ -104,6 +106,7 @@ runs:
         DASH_ENTERPRISE_PASSWORD: ${{inputs.DE_PASSWORD}}
         DASH_ENTERPRISE_USERNAME: ${{inputs.DE_USERNAME}}
     - name: Create presistent filesystem
+      shell: bash
       if: ${{ inputs.create_persistent_filesystem }}
       run: |
         de --no-keyfile apps update --persistent-filesystem
