@@ -77,6 +77,52 @@ runs:
       env:
         APP_NAME: ${{ inputs.app_name }}
         EVENT_NUMBER: ${{github.event.number}}
+    - name: Reset environment
+        shell: bash
+        run: |
+          # Create the app if it does not already exist
+          exists=$(de --no-keyfile apps exists -n $APP)
+          if [[ $exists == *"App [$APP] does not exist on [$DASH_ENTERPRISE_HOST]."* ]]; then
+              de --no-keyfile apps create -n $APP
+          fi
+        env:
+          DASH_ENTERPRISE_HOST: ${{ secrets.DE_HOST }}
+          DASH_ENTERPRISE_USERNAME: ${{ secrets.DE_USERNAME }}
+          DASH_ENTERPRISE_PASSWORD: ${{ secrets.DE_PASSWORD }}
+          APP: ${{ steps.app_name.outputs.app_name }}
+    - name: Create Redis
+      shell: bash
+      if: ${{ inputs.create_redis }}
+      run: |
+        exists=$(de --no-keyfile services exists -n $APP -t redis)
+        if [[ $exists == "False" ]]; then
+          de --no-keyfile services create --app-name ${{ steps.app_name.outputs.app_name }} --type redis
+        fi
+      env:
+        DASH_ENTERPRISE_HOST: ${{inputs.DE_HOST}}
+        DASH_ENTERPRISE_PASSWORD: ${{inputs.DE_PASSWORD}}
+        DASH_ENTERPRISE_USERNAME: ${{inputs.DE_USERNAME}}
+    - name: Create Postgres
+      shell: bash
+      if: ${{ inputs.create_postgres }}
+      run: |
+        exists=$(de --no-keyfile services exists -n $APP -t postgres)
+        if [[ $exists == "False" ]]; then
+          de --no-keyfile services create --app-name ${{ steps.app_name.outputs.app_name }} --type postgres
+        fi
+      env:
+        DASH_ENTERPRISE_HOST: ${{inputs.DE_HOST}}
+        DASH_ENTERPRISE_PASSWORD: ${{inputs.DE_PASSWORD}}
+        DASH_ENTERPRISE_USERNAME: ${{inputs.DE_USERNAME}}
+    - name: Create presistent filesystem
+      shell: bash
+      if: ${{ inputs.create_persistent_filesystem }}
+      run: |
+        de --no-keyfile apps update -n ${{ steps.app_name.outputs.app_name }} --persistent-filesystem
+      env:
+        DASH_ENTERPRISE_HOST: ${{inputs.DE_HOST}}
+        DASH_ENTERPRISE_PASSWORD: ${{inputs.DE_PASSWORD}}
+        DASH_ENTERPRISE_USERNAME: ${{inputs.DE_USERNAME}}
     - name: Inject code and deploy
       shell: bash
       if: github.event.action != 'closed'
@@ -87,33 +133,7 @@ runs:
         DASH_ENTERPRISE_HOST: ${{inputs.DE_HOST}}
         DASH_ENTERPRISE_PASSWORD: ${{inputs.DE_PASSWORD}}
         DASH_ENTERPRISE_USERNAME: ${{inputs.DE_USERNAME}}
-    - name: Create Redis
-      shell: bash
-      if: ${{ inputs.create_redis }}
-      run: |
-        de --no-keyfile services create --app-name ${{ steps.app_name.outputs.app_name }} --type redis
-      env:
-        DASH_ENTERPRISE_HOST: ${{inputs.DE_HOST}}
-        DASH_ENTERPRISE_PASSWORD: ${{inputs.DE_PASSWORD}}
-        DASH_ENTERPRISE_USERNAME: ${{inputs.DE_USERNAME}}
-    - name: Create Postgres
-      shell: bash
-      if: ${{ inputs.create_postgres }}
-      run: |
-        de --no-keyfile services create --app-name ${{ steps.app_name.outputs.app_name }} --type postgres
-      env:
-        DASH_ENTERPRISE_HOST: ${{inputs.DE_HOST}}
-        DASH_ENTERPRISE_PASSWORD: ${{inputs.DE_PASSWORD}}
-        DASH_ENTERPRISE_USERNAME: ${{inputs.DE_USERNAME}}
-    - name: Create presistent filesystem
-      shell: bash
-      if: ${{ inputs.create_persistent_filesystem }}
-      run: |
-        de --no-keyfile apps update --persistent-filesystem
-      env:
-        DASH_ENTERPRISE_HOST: ${{inputs.DE_HOST}}
-        DASH_ENTERPRISE_PASSWORD: ${{inputs.DE_PASSWORD}}
-        DASH_ENTERPRISE_USERNAME: ${{inputs.DE_USERNAME}}
+
     - name: Generate details link as commit status
       shell: bash
       if: github.event.action != 'closed'
