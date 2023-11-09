@@ -139,7 +139,7 @@ runs:
       if: github.event.action != 'closed'
       run: |
         de --no-keyfile deploy ${{ inputs.app_directory }} --name ${{ steps.app_name.outputs.app_name }} --message "Deployed commit: $GITHUB_SHA" -y
-        de --no-keyfile apps update --name ${{ steps.app_name.outputs.app_name }} --group-editor ${{ inputs.group_co_owners }} --group-viewer ${{ inputs.group_viewers }}
+        de --no-keyfile apps update --name ${{ steps.app_name.outputs.app_name }} --add-group-editor "${{ inputs.group_co_owners }}" --add-group-viewer "${{ inputs.group_viewers }}"
       env:
         DASH_ENTERPRISE_HOST: ${{inputs.DE_HOST}}
         DASH_ENTERPRISE_PASSWORD: ${{inputs.DE_PASSWORD}}
