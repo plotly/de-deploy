@@ -2,7 +2,7 @@
 
 This is a GitHub Action to deploy a Dash application to Dash Enterprise 5.
 
-Under the hood, it uses https://github.com/plotly/dekn-client :rocket:
+Under the hood, it uses `de-client` :rocket:
 
 ## Usage
 
