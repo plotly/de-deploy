@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - uses: plotly/de-deploy@main
+      - uses: plotly/de-deploy@v2
         with:
           DE_HOST: ${{ secrets.DE_HOST }}
           DE_USERNAME: ${{ secrets.DE_USERNAME }}
