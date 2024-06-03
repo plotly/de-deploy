@@ -45,7 +45,11 @@ inputs:
     description: True to create a persistent filesystem for the app.
     type: boolean
     required: false
-  
+  env_vars:
+    description: Environment variables to add. Separate multiple variables with a space.
+    required: false
+    type: string
+
   
     
 runs:
@@ -138,6 +142,12 @@ runs:
       shell: bash
       if: github.event.action != 'closed'
       run: |
+        # Split the environment variables by space and add them
+        IFS=' ' read -r -a env_vars_array <<< "${{ inputs.env_vars }}"
+        for env_var in "${env_vars_array[@]}"
+        do
+          de --no-keyfile apps update --name ${{ steps.app_name.outputs.app_name }} --add-environment-variable "$env_var"
+        done
         de --no-keyfile deploy ${{ inputs.app_directory }} --name ${{ steps.app_name.outputs.app_name }} --message "Deployed commit: $GITHUB_SHA" -y
         de --no-keyfile apps update --name ${{ steps.app_name.outputs.app_name }} --add-group-co-owner "${{ inputs.group_co_owners }}" --add-group-viewer "${{ inputs.group_viewers }}"
       env:
