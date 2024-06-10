@@ -4,6 +4,13 @@ This is a GitHub Action to deploy a Dash application to Dash Enterprise 5.
 
 Under the hood, it uses `de-client` :rocket:
 
+<div align="center">
+  <a href="https://dash.plotly.com/project-maintenance">
+    <img src="https://dash.plotly.com/assets/images/maintained-by-plotly.png" width="400px" alt="Maintained by Plotly">
+  </a>
+</div>
+
+
 ## Usage
 
 To use a GitHub action you can just reference it on your Workflow file
