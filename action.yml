@@ -28,7 +28,7 @@ inputs:
   group_viewers:
     description: User groups to add as viewers to the app. If not provided, no groups will be added.
     required: false
-    type: strong
+    type: string
   group_co_owners:
     description: User groups to add as co-owners to the app. If not provided, no groups will be added.
     type: boolean
