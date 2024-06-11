@@ -45,11 +45,6 @@ inputs:
     description: True to create a persistent filesystem for the app.
     type: boolean
     required: false
-  DE_ENV_VAR:
-    description: Environment variables to set for the app. List of name-value pairs.
-    required: false
-    type: array
-    default: []
 
 runs:
   using: composite
@@ -104,16 +99,11 @@ runs:
           -H "X-GitHub-Api-Version: 2022-11-28"\
           https://api.github.com/repos/${{ github.repository }}/statuses/${{github.event.pull_request.head.sha || github.sha}}\
           -d '{"state":"success","target_url":"https://${{ inputs.DE_HOST }}/apps/${{ steps.app_name.outputs.app_name }}","description":"App manager ready!","context":"deploy/${{ steps.app_name.outputs.app_name }}"}'
-    - name: Set environment variables
-      shell: bash
-      run: |
-        for env_var in "${DE_ENV_VAR[@]}"; do
-          name=$(echo $env_var | jq -r '.name')
-          value=$(echo $env_var | jq -r '.value')
+      - name: Set environment variables
+        run: |
+          name=${{ matrix.env_var.name }}
+          value=${{ matrix.env_var.value }}
           de --no-keyfile apps update --name ${{ steps.app_name.outputs.app_name }} --add-environment-variable "$name=$value"
-        done
-      env:
-        DE_ENV_VAR: ${{ inputs.DE_ENV_VAR }}
     - name: Create Redis
       shell: bash
       if: ${{ inputs.create_redis }}
