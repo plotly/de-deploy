@@ -48,7 +48,8 @@ inputs:
   DE_ENV_VAR:
     description: Environment variables to set for the app. List of name-value pairs.
     required: false
-    type: string
+    type: array
+    default: []
 
 runs:
   using: composite
@@ -112,7 +113,7 @@ runs:
           de --no-keyfile apps update --name ${{ steps.app_name.outputs.app_name }} --add-environment-variable "$name=$value"
         done
       env:
-        DE_ENV_VAR: ${{ toJson(inputs.DE_ENV_VAR) }}
+        DE_ENV_VAR: ${{ inputs.DE_ENV_VAR }}
     - name: Create Redis
       shell: bash
       if: ${{ inputs.create_redis }}
