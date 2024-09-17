@@ -48,7 +48,7 @@ inputs:
   de_client_version:
     description: Version of the de_client to install.
     required: false
-    default: '1.5.3'
+    default: '1.8.2'
     type: string
 
   
