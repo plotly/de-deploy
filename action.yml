@@ -71,6 +71,7 @@ runs:
         else
           # Install the specified version
           pip install de-client==${{ inputs.de_client_version }} --extra-index-url=https://${{ inputs.DE_HOST }}/packages
+        fi
     - name: Generate app name
       id: app_name
       shell: bash
