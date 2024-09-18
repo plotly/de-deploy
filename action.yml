@@ -62,10 +62,10 @@ runs:
         source .venv/bin/activate
         if [ "${{ inputs.de_client_version }}" = "latest" ]; then
           # If no version is specified, install the latest version
-          uv pip install de-client --extra-index-url=https://${{ inputs.DE_HOST }}/packages --upgrade
+          uv pip install de-client --extra-index-url=https://${{ inputs.DE_HOST }}/packages --upgrade --index-strategy unsafe-any-match
         else
           # Install the specified version
-          uv pip install de-client==${{ inputs.de_client_version }} --extra-index-url=https://${{ inputs.DE_HOST }}/packages
+          uv pip install de-client==${{ inputs.de_client_version }} --extra-index-url=https://${{ inputs.DE_HOST }}/packages --index-strategy unsafe-any-match
         fi
     - name: Generate app name
       id: app_name
