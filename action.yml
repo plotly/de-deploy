@@ -48,12 +48,9 @@ inputs:
   de_client_version:
     description: Version of the Dash Enterprise client to install. If not provided, the latest version will be installed.
     required: false
-    default: ''
+    default: ""
     type: string
 
-  
-  
-    
 runs:
   using: composite
   steps:
@@ -63,7 +60,7 @@ runs:
       run: |
         if [ -z "${{ inputs.de_client_version }}" ]; then
           # If no version is specified, install the latest version
-          uv pip install de-client --extra-index-url=https://${{ inputs.DE_HOST }}/packages
+          uv pip install de-client --extra-index-url=https://${{ inputs.DE_HOST }}/packages --upgrade
         else
           # Install the specified version
           uv pip install de-client==${{ inputs.de_client_version }} --extra-index-url=https://${{ inputs.DE_HOST }}/packages
@@ -161,7 +158,6 @@ runs:
         DASH_ENTERPRISE_PASSWORD: ${{inputs.DE_PASSWORD}}
         DASH_ENTERPRISE_HOST: ${{inputs.DE_HOST}}
         DASH_ENTERPRISE_USERNAME: ${{inputs.DE_USERNAME}}
-
 
 branding:
   icon: activity
