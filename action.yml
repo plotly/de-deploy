@@ -87,6 +87,7 @@ runs:
     - name: Create app if it does not exist
       shell: bash
       run: |
+        source .venv/bin/activate
         # Create the app if it does not already exist
         exists=$(de --no-keyfile apps exists -n $APP_NAME)
         if [[ $exists == *"App [$APP_NAME] does not exist on [$DASH_ENTERPRISE_HOST]."* ]]; then
@@ -112,6 +113,7 @@ runs:
       shell: bash
       if: ${{ inputs.create_redis }}
       run: |
+        source .venv/bin/activate
         exists=$(de --no-keyfile services exists -n ${{ steps.app_name.outputs.app_name }} -t redis)
         if [[ $exists == "False" ]]; then
           de --no-keyfile services create --app-name ${{ steps.app_name.outputs.app_name }} --type redis
@@ -124,6 +126,7 @@ runs:
       shell: bash
       if: ${{ inputs.create_postgres }}
       run: |
+        source .venv/bin/activate
         exists=$(de --no-keyfile services exists -n ${{ steps.app_name.outputs.app_name }} -t postgres)
         if [[ $exists == "False" ]]; then
           de --no-keyfile services create --app-name ${{ steps.app_name.outputs.app_name }} --type postgres
@@ -136,6 +139,7 @@ runs:
       shell: bash
       if: ${{ inputs.create_persistent_filesystem }}
       run: |
+        source .venv/bin/activate
         de --no-keyfile apps update -n ${{ steps.app_name.outputs.app_name }} --persistent-filesystem
       env:
         DASH_ENTERPRISE_HOST: ${{inputs.DE_HOST}}
@@ -145,6 +149,7 @@ runs:
       shell: bash
       if: github.event.action != 'closed'
       run: |
+        source .venv/bin/activate
         de --no-keyfile deploy ${{ inputs.app_directory }} --name ${{ steps.app_name.outputs.app_name }} --message "Deployed commit: $GITHUB_SHA" -y
         de --no-keyfile apps update --name ${{ steps.app_name.outputs.app_name }} --add-group-co-owner "${{ inputs.group_co_owners }}" --add-group-viewer "${{ inputs.group_viewers }}"
       env:
@@ -155,6 +160,7 @@ runs:
       shell: bash
       if: github.event.action == 'closed'
       run: |
+        source .venv/bin/activate
         de --no-keyfile apps delete --name ${{ steps.app_name.outputs.app_name }}
       env:
         DASH_ENTERPRISE_PASSWORD: ${{inputs.DE_PASSWORD}}
