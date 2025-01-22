@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - uses: plotly/de-deploy@v2
+      - uses: plotly/de-deploy # Add @ version/branch/commit to pin, e.g. plotly/de-deploy@v4 or plotly/de-deploy@main
         with:
           DE_HOST: ${{ secrets.DE_HOST }}
           DE_USERNAME: ${{ secrets.DE_USERNAME }}
