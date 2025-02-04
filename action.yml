@@ -48,29 +48,24 @@ inputs:
   de_client_version:
     description: Version of the Dash Enterprise client to install. If not provided, the latest version will be installed.
     required: false
-    default: ''
+    default: "latest"
     type: string
 
-  
-  
-    
 runs:
   using: composite
   steps:
-    - name: Set up Python
-      uses: actions/setup-python@v3
-      with:
-        python-version: '3.10'
+    - uses: astral-sh/setup-uv@v2
     - name: Install de-client
       shell: bash
       run: |
-        python -m pip install --upgrade pip
-        if [ -z "${{ inputs.de_client_version }}" ]; then
+        uv venv
+        source .venv/bin/activate
+        if [ "${{ inputs.de_client_version }}" = "latest" ]; then
           # If no version is specified, install the latest version
-          pip install de-client --extra-index-url=https://${{ inputs.DE_HOST }}/packages
+          uv pip install de-client --extra-index-url=https://${{ inputs.DE_HOST }}/packages --upgrade --index-strategy unsafe-any-match
         else
           # Install the specified version
-          pip install de-client==${{ inputs.de_client_version }} --extra-index-url=https://${{ inputs.DE_HOST }}/packages
+          uv pip install de-client==${{ inputs.de_client_version }} --extra-index-url=https://${{ inputs.DE_HOST }}/packages --index-strategy unsafe-any-match
         fi
     - name: Generate app name
       id: app_name
@@ -92,6 +87,7 @@ runs:
     - name: Create app if it does not exist
       shell: bash
       run: |
+        source .venv/bin/activate
         # Create the app if it does not already exist
         exists=$(de --no-keyfile apps exists -n $APP_NAME)
         if [[ $exists == *"App [$APP_NAME] does not exist on [$DASH_ENTERPRISE_HOST]."* ]]; then
@@ -117,6 +113,7 @@ runs:
       shell: bash
       if: ${{ inputs.create_redis }}
       run: |
+        source .venv/bin/activate
         exists=$(de --no-keyfile services exists -n ${{ steps.app_name.outputs.app_name }} -t redis)
         if [[ $exists == "False" ]]; then
           de --no-keyfile services create --app-name ${{ steps.app_name.outputs.app_name }} --type redis
@@ -129,6 +126,7 @@ runs:
       shell: bash
       if: ${{ inputs.create_postgres }}
       run: |
+        source .venv/bin/activate
         exists=$(de --no-keyfile services exists -n ${{ steps.app_name.outputs.app_name }} -t postgres)
         if [[ $exists == "False" ]]; then
           de --no-keyfile services create --app-name ${{ steps.app_name.outputs.app_name }} --type postgres
@@ -141,6 +139,7 @@ runs:
       shell: bash
       if: ${{ inputs.create_persistent_filesystem }}
       run: |
+        source .venv/bin/activate
         de --no-keyfile apps update -n ${{ steps.app_name.outputs.app_name }} --persistent-filesystem
       env:
         DASH_ENTERPRISE_HOST: ${{inputs.DE_HOST}}
@@ -150,6 +149,7 @@ runs:
       shell: bash
       if: github.event.action != 'closed'
       run: |
+        source .venv/bin/activate
         de --no-keyfile deploy ${{ inputs.app_directory }} --name ${{ steps.app_name.outputs.app_name }} --message "Deployed commit: $GITHUB_SHA" -y
         de --no-keyfile apps update --name ${{ steps.app_name.outputs.app_name }} --add-group-co-owner "${{ inputs.group_co_owners }}" --add-group-viewer "${{ inputs.group_viewers }}"
       env:
@@ -160,12 +160,12 @@ runs:
       shell: bash
       if: github.event.action == 'closed'
       run: |
+        source .venv/bin/activate
         de --no-keyfile apps delete --name ${{ steps.app_name.outputs.app_name }}
       env:
         DASH_ENTERPRISE_PASSWORD: ${{inputs.DE_PASSWORD}}
         DASH_ENTERPRISE_HOST: ${{inputs.DE_HOST}}
         DASH_ENTERPRISE_USERNAME: ${{inputs.DE_USERNAME}}
-
 
 branding:
   icon: activity
