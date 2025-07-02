@@ -50,6 +50,10 @@ inputs:
     required: false
     default: ''
     type: string
+  deploy_message:
+    description: Comment to use for the deploy commit. If not provided, the default commit message will be used.
+    required: false
+    type: string
 
   
   
@@ -150,7 +154,12 @@ runs:
       shell: bash
       if: github.event.action != 'closed'
       run: |
-        de --no-keyfile deploy ${{ inputs.app_directory }} --name ${{ steps.app_name.outputs.app_name }} --message "Deployed commit: $GITHUB_SHA" -y
+        if [[ -z "${{ inputs.deploy_message }}" ]]; then
+          deploy_message="Deployed commit: $GITHUB_SHA"
+        else
+          deploy_message="${{ inputs.deploy_message }}"
+        fi
+        de --no-keyfile deploy ${{ inputs.app_directory }} --name ${{ steps.app_name.outputs.app_name }} --message "$deploy_message" -y
         de --no-keyfile apps update --name ${{ steps.app_name.outputs.app_name }} --add-group-co-owner "${{ inputs.group_co_owners }}" --add-group-viewer "${{ inputs.group_viewers }}"
       env:
         DASH_ENTERPRISE_HOST: ${{inputs.DE_HOST}}
