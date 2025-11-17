@@ -12,10 +12,6 @@ Under the hood, it uses `de-client` :rocket:
 
 
 ## Usage
-
-To use a GitHub action you can just reference it on your Workflow file
-(for more info check [this article by Github](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/configuring-a-workflow))
-
 If you have your application code on Github, add and commit the following to `<your-app>/.github/workflows/deploy.yml` to get started. Make sure to set the required variables in the "Secrets and variables" for Actions in your repository settings.
 
 > Note: This is a minimal example. Review the table below for additional inputs and recommendations for using this Action with a monorepo.
