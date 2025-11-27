@@ -59,6 +59,7 @@ The inputs this action uses are:
 | `create_postgres` | `false` | None | True to create a Postgres instance for the app. |
 | `create_persistent_filesystem` | `false` | None | True to create a persistent filesystem for the app. |
 | `de_client_version` | `false` | None | Version of the Dash Enterprise client to install. If not provided, the latest version will be installed. |
+| `python_version` | `false` | `3.10` | Python version to use for the deployment. If not provided, Python 3.10 will be used. |
 
 ### Preview deploy on pull request
 This action will deploy branches using the `on: pull_request: types: ['opened', 'edited', 'synchronize', 'closed']` trigger as `https://${DE_HOST}/${APP_NAME}-${event_number}`, e.g. if you are deploying an app called `inventory-analytics` to `example.plotly.host` and your PR number is `15`, the deploy preview would be available at `https://example.plotly.host/inventory-analytics-15` and would be redeployed on every new commit to that PR.
