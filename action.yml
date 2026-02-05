@@ -72,6 +72,16 @@ runs:
           # Install the specified version
           pip install de-client==${{ inputs.de_client_version }} --extra-index-url=https://${{ inputs.DE_HOST }}/packages
         fi
+    - name: Check Secret Presence
+      run: |
+        if [ -z "$DE_PASSWORD" ]; then
+          echo "SECRET IS MISSING"
+          exit 1
+        else
+          echo "SECRET IS PRESENT"
+        fi
+      env:
+        DE_PASSWORD: ${{ secrets.DE_PASSWORD }}
     - name: Generate app name
       id: app_name
       shell: bash
