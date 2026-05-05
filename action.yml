@@ -28,10 +28,10 @@ inputs:
   group_viewers:
     description: User groups to add as viewers to the app. If not provided, no groups will be added.
     required: false
-    type: strong
+    type: string
   group_co_owners:
     description: User groups to add as co-owners to the app. If not provided, no groups will be added.
-    type: boolean
+    type: string
     required: false
   create_redis:
     description: True to create a Redis instance for the app.
@@ -158,7 +158,20 @@ runs:
           deploy_message="${{ inputs.deploy_message }}"
         fi
         de --no-keyfile deploy ${{ inputs.app_directory }} --name ${{ steps.app_name.outputs.app_name }} --message "$deploy_message" -y
-        de --no-keyfile apps update --name ${{ steps.app_name.outputs.app_name }} --add-group-co-owner "${{ inputs.group_co_owners }}" --add-group-viewer "${{ inputs.group_viewers }}"
+        # Only invoke `apps update` with group flags if at least one group input is set.
+        # Empty values would otherwise be passed as `--add-group-co-owner ""` /
+        # `--add-group-viewer ""`, which fails on de-client>=1.10.0 with
+        # "Group '' could not be found on <host>."
+        update_args=()
+        if [[ -n "${{ inputs.group_co_owners }}" ]]; then
+          update_args+=( --add-group-co-owner "${{ inputs.group_co_owners }}" )
+        fi
+        if [[ -n "${{ inputs.group_viewers }}" ]]; then
+          update_args+=( --add-group-viewer "${{ inputs.group_viewers }}" )
+        fi
+        if (( ${#update_args[@]} > 0 )); then
+          de --no-keyfile apps update --name ${{ steps.app_name.outputs.app_name }} "${update_args[@]}"
+        fi
       env:
         DASH_ENTERPRISE_HOST: ${{inputs.DE_HOST}}
         DASH_ENTERPRISE_PASSWORD: ${{inputs.DE_PASSWORD}}
