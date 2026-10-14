@@ -50,6 +50,15 @@ inputs:
     required: false
     default: ''
     type: string
+  python_version:
+    description: Python version to use for the deployment. If not provided, the default Python version for the DE server will be used.
+    required: false
+    type: string
+  python_version_cicd:
+    description: Python version to use for the action environment. If not provided, Python 3.10 will be used.
+    required: false
+    default: '3.10'
+    type: string
   deploy_message:
     description: Comment to use for the deploy commit. If not provided, the default commit message will be used.
     required: false
@@ -62,7 +71,7 @@ runs:
     - name: Set up Python
       uses: actions/setup-python@v3
       with:
-        python-version: '3.10'
+        python-version: ${{ inputs.python_version_cicd }}
     - name: Install de-client
       shell: bash
       run: |
@@ -74,6 +83,8 @@ runs:
           # Install the specified version
           pip install de-client==${{ inputs.de_client_version }} --extra-index-url=https://${{ inputs.DE_HOST }}/packages
         fi
+        DE_VERSION=$(de --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n1)
+        echo "de_version=$DE_VERSION" >> "$GITHUB_OUTPUT"
     - name: Generate app name
       id: app_name
       shell: bash
@@ -87,7 +98,7 @@ runs:
         if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
             APP_NAME=$APP_NAME-$EVENT_NUMBER
         fi
-        echo "::set-output name=app_name::$APP_NAME"
+        echo "app_name=$APP_NAME" >> "$GITHUB_OUTPUT"
       env:
         APP_NAME: ${{ inputs.app_name }}
         EVENT_NUMBER: ${{github.event.number}}
@@ -115,6 +126,22 @@ runs:
           -H "X-GitHub-Api-Version: 2022-11-28"\
           https://api.github.com/repos/${{ github.repository }}/statuses/${{github.event.pull_request.head.sha || github.sha}}\
           -d '{"state":"success","target_url":"https://${{ inputs.DE_HOST }}/apps/${{ steps.app_name.outputs.app_name }}","description":"App manager ready!","context":"deploy/${{ steps.app_name.outputs.app_name }}"}'
+    - name: Set Python version
+      shell: bash
+      if: ${{ inputs.python_version != '' }}
+      run: |
+        DE_VERSION="${{ steps.install_de_client.outputs.de_version }}"
+        MIN_VERSION="1.9.4"
+        # Compare versions using sort -V; only proceed if DE_VERSION >= MIN_VERSION
+        if [[ "$(printf '%s\n%s\n' "$MIN_VERSION" "$DE_VERSION" | sort -V | head -n1)" == "$MIN_VERSION" ]]; then
+          de --no-keyfile apps update --name ${{ steps.app_name.outputs.app_name }} --python-version ${{ inputs.python_version_app }}
+        else
+          echo "de-client $DE_VERSION does not support --python-version (requires >=$MIN_VERSION); skipping."
+        fi
+      env:
+        DASH_ENTERPRISE_HOST: ${{inputs.DE_HOST}}
+        DASH_ENTERPRISE_PASSWORD: ${{inputs.DE_PASSWORD}}
+        DASH_ENTERPRISE_USERNAME: ${{inputs.DE_USERNAME}}
     - name: Create Redis
       shell: bash
       if: ${{ inputs.create_redis }}
