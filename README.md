@@ -63,6 +63,7 @@ The inputs this action uses are:
 | `create_postgres` | `false` | None | True to create a Postgres instance for the app. |
 | `create_persistent_filesystem` | `false` | None | True to create a persistent filesystem for the app. |
 | `de_client_version` | `false` | None | Version of the Dash Enterprise client to install. If not provided, the latest version will be installed. |
+| `python_version` | `false` | `3.10` | Python version to use for the deployment. If not provided, Python 3.10 will be used. |
 | `deploy_message` | `false` | None |Comment to use for the deploy commit. If not provided, the default commit message will be used. |
 
 ### Preview deploy on pull request
