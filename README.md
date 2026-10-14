@@ -14,7 +14,7 @@ Under the hood, it uses `de-client` :rocket:
 ## Usage
 
 To use a GitHub action you can just reference it on your Workflow file
-(for more info check [this article by Github](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/configuring-a-workflow))
+(for more info check [this article by Github](https://docs.github.com/en/actions/writing-workflows/quickstart))
 
 If you have your application code on Github, add and commit the following to `<your-app>/.github/workflows/deploy.yml` to get started. Make sure to set the required variables in the "Secrets and variables" for Actions in your repository settings.
 
@@ -64,6 +64,7 @@ The inputs this action uses are:
 | `create_persistent_filesystem` | `false` | None | True to create a persistent filesystem for the app. |
 | `de_client_version` | `false` | None | Version of the Dash Enterprise client to install. If not provided, the latest version will be installed. |
 | `python_version` | `false` | `3.10` | Python version to use for the deployment. If not provided, Python 3.10 will be used. |
+| `deploy_message` | `false` | None |Comment to use for the deploy commit. If not provided, the default commit message will be used. |
 
 ### Preview deploy on pull request
 This action will deploy branches using the `on: pull_request: types: ['opened', 'edited', 'synchronize', 'closed']` trigger as `https://${DE_HOST}/${APP_NAME}-${event_number}`, e.g. if you are deploying an app called `inventory-analytics` to `example.plotly.host` and your PR number is `15`, the deploy preview would be available at `https://example.plotly.host/inventory-analytics-15` and would be redeployed on every new commit to that PR.
